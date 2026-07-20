@@ -1,0 +1,39 @@
+generated: '2026-07-19'
+method: searched
+source: >-
+  https://registry.terraform.io/providers/funnel-io/funnel/latest/docs +
+  provider/auth/auth0_client.go (github.com/funnel-io/terraform-provider-funnel)
+docs: https://registry.terraform.io/providers/funnel-io/funnel/latest/docs
+summary:
+  types:
+  - oauth2
+  oauth2_flows:
+  - clientCredentials
+  api_key_in: []
+schemes:
+- name: FunnelSystemUserOAuth
+  type: oauth2
+  flow: clientCredentials
+  token_url: https://login.funnel.io/oauth/token
+  token_url_eu: https://login.funnel.io/oauth/token
+  identity_provider: Auth0
+  audience:
+  - https://controlplane.setup.us.funnel.io
+  - https://controlplane.setup.eu.funnel.io
+  grant_type: client_credentials
+  token_type: Bearer
+  credentials:
+  - client_id
+  - client_secret
+  scopes: []
+  sources:
+  - registry.terraform.io/providers/funnel-io/funnel/latest/docs
+  description: >-
+    Server-to-server OAuth 2.0 client-credentials flow. A "System user" is created per subscription
+    in the Funnel app (Subscription overview -> Authentication), yielding a client_id and
+    client_secret. These are exchanged at the Auth0 token endpoint with the region-appropriate
+    audience for a Bearer access token used against the regional Control Plane API host.
+notes: >-
+  No scope surface is documented (access is scoped by subscription and audience, not OAuth scopes),
+  so no scopes/ artifact is emitted. Authentication is region-aware: US and EU environments use
+  distinct audiences and Control Plane hosts (controlplane.setup.us|eu.funnel.io) for data residency.
