@@ -1,0 +1,22 @@
+generated: '2026-07-19'
+method: searched
+source: https://status.funnel.io + https://registry.terraform.io/providers/funnel-io/funnel
+api: Funnel Control Plane API
+versioning:
+  scheme: uri-path
+  current: v1
+status_page: https://status.funnel.io
+status_page_provider: Atlassian Statuspage
+provider_releases: https://github.com/funnel-io/terraform-provider-funnel/releases
+deprecation:
+  policy_url: null
+  sunset_header: unknown
+  detail: No published deprecation policy or RFC 8594 Sunset/Deprecation header commitment found.
+sla:
+  url: null
+  detail: No public SLA/uptime-target document found (Enterprise plan; SLA likely contractual).
+notes: >-
+  Status page confirmed live at status.funnel.io (Atlassian Statuspage, "Operational"). Versioning
+  and release cadence for the programmatic surface are tracked via the official Terraform provider
+  releases (see changelog/funnel-changelog.yml). No public deprecation policy was found, so no
+  Deprecation pointer is emitted.

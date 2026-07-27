@@ -1,0 +1,20 @@
+generated: '2026-07-19'
+method: searched
+source: https://github.com/funnel-io/terraform-provider-funnel/releases
+subject: Funnel Terraform provider (funnel-io/funnel) — the first-party client for the Funnel Control Plane API
+scheme: semver
+current_version: v0.2.1
+entries:
+- version: v0.2.1
+  date: '2026-06-16'
+  highlights: Terraform provider release (funnel-io/funnel v0.2.1).
+- version: v0.2.0
+  date: '2026-04-24'
+  highlights: Terraform provider release (funnel-io/funnel v0.2.0).
+- version: v0.1.6
+  date: null
+  highlights: Terraform provider release (funnel-io/funnel v0.1.6).
+notes: >-
+  Funnel does not publish a dated changelog for the Control Plane API itself; the official Terraform
+  provider's GitHub releases are the authoritative dated change history for the programmatic surface.
+  Dates are the release published_at timestamps from the GitHub Releases API.

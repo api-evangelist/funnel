@@ -1,0 +1,44 @@
+generated: '2026-07-19'
+method: searched
+source: >-
+  https://registry.terraform.io/providers/funnel-io/funnel/latest/docs +
+  terraform-provider-funnel source (provider/funnel/funnel_client.go, provider/funnel/error_handler.go)
+api: Funnel Control Plane API
+authentication:
+  style: oauth2-client-credentials
+  detail: OAuth 2.0 client-credentials (Auth0 system user) -> Bearer token. See authentication/funnel-authentication.yml
+versioning:
+  scheme: uri-path
+  current: v1
+  detail: Control Plane API is served under a /v1 path segment on each regional host.
+regions:
+  style: host-based-data-residency
+  hosts:
+  - region: us
+    host: https://controlplane.setup.us.funnel.io/v1
+  - region: eu
+    host: https://controlplane.setup.eu.funnel.io/v1
+  - region: stage
+    host: https://controlplane.setup.stage.funnel.io/v1
+  detail: >-
+    The region (us/eu) selects both the API host and the Auth0 audience; US and EU are isolated for
+    data residency. A stage environment exists for testing.
+scoping:
+  unit: subscription
+  detail: >-
+    A subscription_id scopes all operations; workspaces, data sources, and exports are addressed by
+    resource IDs obtained from the Funnel app UI or resource URLs.
+idempotency:
+  supported: false
+  detail: No documented idempotency-key mechanism for the Control Plane API.
+pagination:
+  supported: unknown
+  detail: Not documented in the public Terraform provider docs.
+errors:
+  detail: >-
+    The provider maps non-2xx HTTP responses to Terraform diagnostics via a dedicated error handler;
+    see conformance/funnel-conformance.yml. A formal RFC 9457 problem+json envelope is not documented.
+notes: >-
+  Conventions derived from the official Terraform provider (the first-party client for the Control
+  Plane API) and its published registry docs; Funnel does not publish a standalone OpenAPI/REST
+  reference for this API.

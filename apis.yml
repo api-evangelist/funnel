@@ -1,9 +1,29 @@
 aid: funnel
-name: funnel
-description: funnel is a company surfaced as a portfolio company of balderton-capital, trinity-ventures
-  and added to the API Evangelist network as a stub for enrichment. This profile is a lead awaiting the
-  enrichment pipeline.
+name: Funnel
+description: >-
+  Funnel (funnel.io) is a marketing intelligence and marketing data hub that helps agencies and
+  brands become more data-driven. It connects to hundreds of advertising, analytics, CRM, and social
+  data platforms, then automatically collects, normalizes, and transforms that marketing data into a
+  single, business-ready model. Funnel exports the harmonized data to cloud data warehouses
+  (BigQuery, Snowflake), Google Cloud Storage, BI and visualization tools, and back to ad platforms,
+  and layers on advanced marketing measurement (Marketing Mix Modeling and Multi-Touch Attribution)
+  plus dashboards and reporting. Programmatic configuration is exposed through the Funnel Control
+  Plane API, consumed via an official Terraform provider and an OAuth 2.0 client-credentials
+  (Auth0) system-user flow, with regional US and EU data residency.
 url: https://raw.githubusercontent.com/api-evangelist/funnel/refs/heads/main/apis.yml
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://funnel.io/hubfs/Blog%20images.006.jpeg
 x-type: company
 x-source: vc-portfolio
 x-backed-by:
@@ -13,10 +33,41 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-19'
 tags:
 - Company
-apis: []
+- Marketing
+- Marketing Intelligence
+- Marketing Data
+- Analytics
+- Advertising
+- Data Integration
+- ETL
+- Data Warehouse
+- Attribution
+- Reporting
+- Business Intelligence
+apis:
+- name: Funnel Control Plane API
+  description: >-
+    The Funnel Control Plane API provides configuration-management operations for a Funnel
+    subscription — workspaces, data sources, custom dimensions and metrics, and data exports to
+    BigQuery, Snowflake, Google Cloud Storage, and measurement destinations. It authenticates with
+    OAuth 2.0 client-credentials (system user) via Auth0 and is offered on regional US and EU hosts.
+    It is the API consumed by Funnel's official Terraform provider.
+  humanURL: https://registry.terraform.io/providers/funnel-io/funnel/latest/docs
+  baseURL: https://controlplane.setup.us.funnel.io/v1
+  tags:
+  - Marketing Data
+  - Data Export
+  - Configuration
+  properties:
+  - type: Authentication
+    url: authentication/funnel-authentication.yml
+  - type: Conventions
+    url: conventions/funnel-conventions.yml
+  - type: DataModel
+    url: data-model/funnel-data-model.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -25,3 +76,52 @@ maintainers:
 common:
 - type: Website
   url: https://funnel.io/
+- type: Documentation
+  url: https://help.funnel.io/en/
+- type: APIReference
+  url: https://registry.terraform.io/providers/funnel-io/funnel/latest/docs
+- type: Blog
+  url: https://funnel.io/blog
+- type: Support
+  url: https://help.funnel.io/en/
+- type: Pricing
+  url: https://funnel.io/pricing
+- type: SignUp
+  url: https://app.funnel.io/
+- type: TermsOfService
+  url: https://funnel.io/general-terms-and-conditions
+- type: PrivacyPolicy
+  url: https://funnel.io/privacy
+- type: GitHubOrganization
+  url: https://github.com/funnel-io
+- type: StatusPage
+  url: https://status.funnel.io
+- type: Packages
+  url: packages/funnel-packages.yml
+- type: SDKs
+  url: packages/funnel-packages.yml
+- type: Authentication
+  url: authentication/funnel-authentication.yml
+- type: Conventions
+  url: conventions/funnel-conventions.yml
+- type: DataModel
+  url: data-model/funnel-data-model.yml
+- type: Lifecycle
+  url: lifecycle/funnel-lifecycle.yml
+- type: ChangeLog
+  url: changelog/funnel-changelog.yml
+- type: Conformance
+  url: conformance/funnel-conformance.yml
+- type: Compliance
+  url: https://funnel.io/funnel-information-security-overview
+- type: TrustCenter
+  url: security/funnel-trust-center.yml
+- type: DomainSecurity
+  url: security/funnel-domain-security.yml
+- type: LLMsTxt
+  url: llms/funnel-llms.txt
+x-enrichment:
+  date: '2026-07-19'
+  status: backfilled
+  pass: local-v1
+  note: backfilled from .gitignore signal + verified work evidence

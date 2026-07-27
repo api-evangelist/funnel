@@ -1,0 +1,77 @@
+generated: '2026-07-19'
+method: derived
+source: >-
+  Terraform provider resources/data-sources (docs/resources/*, docs/data-sources/* in
+  github.com/funnel-io/terraform-provider-funnel) — the documented Control Plane API entities.
+api: Funnel Control Plane API
+entities:
+- name: subscription
+  detail: Top-level tenant; scopes all other resources (subscription_id).
+- name: workspace
+  detail: A Funnel account/workspace within a subscription; container for data sources and exports.
+  belongs_to: subscription
+- name: data_source
+  detail: A connected marketing/advertising data platform feeding a workspace.
+  belongs_to: workspace
+- name: custom_dimension
+  detail: A user-defined dimension field in a workspace.
+  belongs_to: workspace
+- name: custom_metric
+  detail: A user-defined metric field in a workspace.
+  belongs_to: workspace
+- name: export_field
+  detail: A field (with export_name/export_type) selected for inclusion in an export.
+  belongs_to: workspace
+- name: bigquery_export
+  detail: Export of harmonized data to Google BigQuery.
+  belongs_to: workspace
+- name: snowflake_export
+  detail: Export of harmonized data to Snowflake.
+  belongs_to: workspace
+- name: gcs_export
+  detail: Export of harmonized data to Google Cloud Storage.
+  belongs_to: workspace
+- name: measurement_export
+  detail: Export to Funnel's measurement (MMM/MTA) destination.
+  belongs_to: workspace
+relationships:
+- from: workspace
+  to: subscription
+  kind: belongs_to
+  via: subscription_id
+- from: data_source
+  to: workspace
+  kind: belongs_to
+  via: workspace
+- from: bigquery_export
+  to: workspace
+  kind: belongs_to
+  via: workspace
+- from: snowflake_export
+  to: workspace
+  kind: belongs_to
+  via: workspace
+- from: gcs_export
+  to: workspace
+  kind: belongs_to
+  via: workspace
+- from: measurement_export
+  to: workspace
+  kind: belongs_to
+  via: workspace
+- from: export_field
+  to: workspace
+  kind: belongs_to
+  via: workspace
+- from: custom_dimension
+  to: workspace
+  kind: belongs_to
+  via: workspace
+- from: custom_metric
+  to: workspace
+  kind: belongs_to
+  via: workspace
+notes: >-
+  Entity graph derived from the official Terraform provider's documented resources and data sources,
+  which map one-to-one onto Control Plane API entities. Funnel does not publish an OpenAPI spec, so
+  field-level schemas and id-prefixes are not enumerated here.

@@ -1,0 +1,35 @@
+generated: '2026-07-19'
+method: searched
+source: >-
+  https://funnel.io/funnel-information-security-overview +
+  registry.terraform.io/providers/funnel-io/funnel + terraform-provider-funnel auth source
+standards:
+- id: oauth2
+  conforms: true
+  evidence: Control Plane API uses OAuth 2.0 client-credentials via Auth0 (Bearer tokens).
+- id: oauth2-client-credentials
+  conforms: true
+  evidence: provider/auth/auth0_client.go performs grant_type=client_credentials token exchange.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: No application/problem+json error envelope documented.
+- id: soc2-type-2
+  conforms: true
+  evidence: "Funnel has undergone a SOC 2 Type 2 attestation (funnel-information-security-overview)."
+- id: iso-27001
+  conforms: true
+  evidence: "Certified to ISO 27001:2022 (funnel-information-security-overview)."
+- id: csa-star
+  conforms: true
+  evidence: "CSA STAR Level 1 self-assessment via CAIQ (funnel-information-security-overview)."
+compliance_program:
+  url: https://funnel.io/funnel-information-security-overview
+  certifications:
+  - ISO 27001:2022
+  - SOC 2 Type II
+  - CSA STAR Level 1
+  practices:
+  - Annual independent third-party penetration testing
+notes: >-
+  Compliance certifications are published on Funnel's Information Security Overview; a Compliance
+  pointer to that page is emitted in apis.yml so the compliance_published check fires.

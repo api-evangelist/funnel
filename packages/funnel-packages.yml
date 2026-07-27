@@ -1,0 +1,44 @@
+generated: '2026-07-19'
+method: searched
+source: https://github.com/funnel-io + https://registry.terraform.io/providers/funnel-io/funnel
+packages:
+- language: hcl
+  registry: terraform
+  name: funnel-io/funnel
+  url: https://registry.terraform.io/providers/funnel-io/funnel/latest
+  install: |
+    terraform {
+      required_providers {
+        funnel = { source = "funnel-io/funnel" }
+      }
+    }
+  official: true
+  description: >-
+    Official Terraform provider for managing Funnel resources (workspaces, data sources, custom
+    dimensions/metrics, and BigQuery/Snowflake/GCS/measurement exports) through the Funnel Control
+    Plane API. Configured with environment (us/eu), subscription_id, client_id, and client_secret.
+- language: python
+  registry: github
+  name: funnel-io/json-normalize
+  url: https://github.com/funnel-io/json-normalize
+  install: null
+  official: true
+  description: First-party utility library that normalizes nested JSON structures into flat dictionaries (not an API client).
+- language: python
+  registry: github
+  name: funnel-io/funnel-rules-engine
+  url: https://github.com/funnel-io/funnel-rules-engine
+  install: null
+  official: true
+  description: First-party generic rules engine utility library (not an API client).
+- language: python
+  registry: github
+  name: funnel-io/python-on-rails
+  url: https://github.com/funnel-io/python-on-rails
+  install: null
+  official: true
+  description: First-party Railway-Oriented Programming helper library (not an API client).
+notes: >-
+  Funnel does not publish a dedicated language SDK (Python/JavaScript/etc.) for the Control Plane API;
+  the Terraform provider is the first-party programmatic client. The other repositories are general
+  first-party utility libraries, catalogued for completeness but not API SDKs.
