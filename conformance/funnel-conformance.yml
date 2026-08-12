@@ -1,27 +1,111 @@
-generated: '2026-07-19'
+generated: '2026-08-12'
 method: searched
 source: >-
   https://funnel.io/funnel-information-security-overview +
-  registry.terraform.io/providers/funnel-io/funnel + terraform-provider-funnel auth source
+  https://funnel.io/pricing +
+  registry.terraform.io/providers/funnel-io/funnel + terraform-provider-funnel auth source +
+  https://login.funnel.io/.well-known/openid-configuration +
+  https://mcp.ai.funnel.io/.well-known/oauth-protected-resource/mcp +
+  https://help.funnel.io/en/collections/19637543-funnel-mcp
 standards:
 - id: oauth2
   conforms: true
-  evidence: Control Plane API uses OAuth 2.0 client-credentials via Auth0 (Bearer tokens).
+  evidence: >-
+    Both the Control Plane API (client-credentials via Auth0) and Funnel MCP (authorization-code)
+    are OAuth 2.0; Bearer tokens throughout.
 - id: oauth2-client-credentials
   conforms: true
   evidence: provider/auth/auth0_client.go performs grant_type=client_credentials token exchange.
+- id: oauth2-authorization-code
+  conforms: true
+  evidence: >-
+    Funnel MCP requires interactive OAuth 2.0 authorization-code sign-in; the Auth0 tenant advertises
+    the authorization_code grant and S256 PKCE in its discovery document.
+- id: oidc
+  conforms: true
+  evidence: >-
+    https://login.funnel.io/.well-known/openid-configuration returns HTTP 200 with a complete OIDC
+    discovery document (issuer, authorization_endpoint, token_endpoint, userinfo_endpoint, jwks_uri).
+    Saved at well-known/funnel-login-openid-configuration.json.
+- id: rfc8414-oauth-authorization-server-metadata
+  conforms: true
+  evidence: >-
+    https://login.funnel.io/.well-known/oauth-authorization-server returns HTTP 200 with the same
+    metadata document.
+- id: rfc9728-oauth-protected-resource-metadata
+  conforms: true
+  evidence: >-
+    Both MCP hosts serve /.well-known/oauth-protected-resource(/mcp) anonymously with HTTP 200,
+    naming the authorization server and scopes_supported. This is what makes the MCP endpoints
+    discoverable to a client that has never seen Funnel before.
+- id: rfc7591-dynamic-client-registration
+  conforms: true
+  evidence: >-
+    The Auth0 tenant publishes registration_endpoint https://login.funnel.io/oidc/register, and
+    Funnel documents that Claude and most MCP clients register dynamically without a static client
+    ID.
+- id: rfc7636-pkce
+  conforms: true
+  evidence: code_challenge_methods_supported includes S256 in the OIDC discovery document.
+- id: mcp
+  conforms: true
+  version_claimed: null
+  evidence: >-
+    Two first-party hosted MCP servers (mcp.ai.funnel.io, mcp.eu.ai.funnel.io) answered a live
+    JSON-RPC 2.0 tools/list on 2026-08-12 with a well-formed MCP error object
+    ({"code":-32001,"message":"Missing Bearer token"}). Funnel publishes a six-tool reference and
+    markets MCP on its product and pricing pages. Funnel does not state which MCP protocol revision
+    it implements.
+  deviation: >-
+    Funnel itself documents that the server publishes an INCOMPLETE parameter schema for the
+    query_data tool ("properties": {}), which breaks strictly-validating MCP clients. A tool
+    advertised with an empty inputSchema is a contract defect against the MCP tool specification.
 - id: rfc9457-problem-details
   conforms: false
-  evidence: No application/problem+json error envelope documented.
+  evidence: >-
+    No application/problem+json error envelope. The Control Plane returns a flat {"error": ...}
+    object; see errors/funnel-problem-types.yml.
+- id: openapi
+  conforms: false
+  evidence: >-
+    No OpenAPI/Swagger document is published. /openapi.json, /openapi.yaml, /swagger.json,
+    /v1/openapi.json, /api-docs, /docs and /redoc were probed on funnel.io, api.funnel.io,
+    docs.funnel.io, developers.funnel.io, help.funnel.io, app.funnel.io and both Control Plane hosts
+    on 2026-08-12; every one returned 404, 403, 401 or an HTML shell.
+- id: asyncapi
+  conforms: false
+  evidence: No AsyncAPI document published; Funnel ships no outbound event surface.
+- id: idempotency
+  conforms: false
+  evidence: >-
+    No idempotency-key header or mechanism. Only DELETE is idempotent, and only because the official
+    client swallows 404.
+- id: rate-limit-headers
+  conforms: false
+  evidence: >-
+    The API returns HTTP 429 but publishes no X-RateLimit-*, RateLimit-* or Retry-After headers.
+- id: saml
+  conforms: true
+  evidence: SAML SSO listed as an Enterprise-plan feature on https://funnel.io/pricing.
+- id: scim
+  conforms: true
+  evidence: >-
+    SCIM listed alongside SAML/OIDC under Enterprise "Single Sign-On" on https://funnel.io/pricing.
+    No SCIM 2.0 endpoint or version is published, so the claim is the vendor's, unverified.
 - id: soc2-type-2
   conforms: true
-  evidence: "Funnel has undergone a SOC 2 Type 2 attestation (funnel-information-security-overview)."
+  evidence: Funnel has undergone a SOC 2 Type 2 attestation (funnel-information-security-overview).
 - id: iso-27001
   conforms: true
-  evidence: "Certified to ISO 27001:2022 (funnel-information-security-overview)."
+  evidence: Certified to ISO 27001:2022 (funnel-information-security-overview).
 - id: csa-star
   conforms: true
-  evidence: "CSA STAR Level 1 self-assessment via CAIQ (funnel-information-security-overview)."
+  evidence: CSA STAR Level 1 self-assessment via CAIQ (funnel-information-security-overview).
+- id: gdpr-eu-data-residency
+  conforms: true
+  evidence: >-
+    Separate EU Control Plane host, EU MCP host and EU app host; "EU Data Center available" is a
+    published Enterprise-plan feature.
 compliance_program:
   url: https://funnel.io/funnel-information-security-overview
   certifications:
@@ -30,6 +114,11 @@ compliance_program:
   - CSA STAR Level 1
   practices:
   - Annual independent third-party penetration testing
+  - Internal penetration testing
+  - Automated third-party dependency vulnerability identification and remediation
 notes: >-
-  Compliance certifications are published on Funnel's Information Security Overview; a Compliance
-  pointer to that page is emitted in apis.yml so the compliance_published check fires.
+  Funnel's standards posture is strong on IDENTITY and weak on CONTRACT. Every OAuth/OIDC discovery
+  standard that matters for agent onboarding is implemented and served anonymously (RFC 8414, RFC
+  9728, RFC 7591, PKCE, OIDC), which is why an MCP client can self-register and connect. But there is
+  no OpenAPI, no AsyncAPI, no RFC 9457 errors, no idempotency and no rate-limit headers — so once a
+  client is authenticated there is nothing machine-readable describing what to call.

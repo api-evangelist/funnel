@@ -1,0 +1,117 @@
+generated: '2026-08-12'
+method: probed
+source: live HTTP probes of every Funnel host named in apis.yml plus the MCP and identity hosts
+summary:
+  hits: 3
+  documents:
+  - openid-configuration (OIDC discovery, Auth0 tenant on Funnel's own domain)
+  - oauth-protected-resource (RFC 9728, US MCP server)
+  - oauth-protected-resource (RFC 9728, EU MCP server)
+probes:
+- host: login.funnel.io
+  path: /.well-known/openid-configuration
+  status: 200
+  content_type: application/json
+  file: funnel-login-openid-configuration.json
+  note: >-
+    Real OIDC discovery document. issuer https://login.funnel.io/, token_endpoint
+    https://login.funnel.io/oauth/token, registration_endpoint https://login.funnel.io/oidc/register
+    (RFC 7591 dynamic client registration), PKCE S256 supported. This is the Auth0 tenant Funnel
+    runs on its own domain and is the authorization server for BOTH the Control Plane API
+    (client_credentials) and Funnel MCP (authorization_code).
+- host: login.funnel.io
+  path: /.well-known/oauth-authorization-server
+  status: 200
+  content_type: application/json
+  file: null
+  note: Byte-identical to the openid-configuration document above; not stored twice.
+- host: login.funnel.io
+  path: /.well-known/jwks.json
+  status: 200
+  content_type: application/json
+  file: null
+  note: Real JWKS served; not stored (key material rotates and carries no durable signal).
+- host: login.funnel.io
+  path: /.well-known/security.txt
+  status: 404
+- host: mcp.ai.funnel.io
+  path: /.well-known/oauth-protected-resource/mcp
+  status: 200
+  content_type: application/json
+  file: funnel-mcp-oauth-protected-resource.json
+  note: >-
+    RFC 9728 Protected Resource Metadata for the global Funnel MCP server. Names
+    https://login.funnel.io as the authorization server and publishes
+    scopes_supported [openid, profile, email, offline_access] plus a static client_id.
+- host: mcp.ai.funnel.io
+  path: /.well-known/oauth-protected-resource
+  status: 200
+  content_type: application/json
+  file: null
+  note: >-
+    Also 200, but resolves to the underlying AWS Bedrock AgentCore gateway hostname
+    (funnel-mcp-us-*.gateway.bedrock-agentcore.us-east-1.amazonaws.com) with empty
+    scopes_supported. The /mcp-suffixed document is the accurate one and is what is stored.
+- host: mcp.eu.ai.funnel.io
+  path: /.well-known/oauth-protected-resource/mcp
+  status: 200
+  content_type: application/json
+  file: funnel-mcp-eu-oauth-protected-resource.json
+  note: EU-region equivalent; same authorization server and scopes.
+- host: mcp.ai.funnel.io
+  path: /.well-known/oauth-authorization-server
+  status: 401
+  note: 'Gated behind the MCP bearer check: {"success":false,"error":"Missing Bearer token"}'
+- host: mcp.ai.funnel.io
+  path: /.well-known/agent-card.json
+  status: 401
+  note: Gated by the same bearer check; not an A2A agent card and no card is published anonymously.
+- host: funnel.io
+  path: /.well-known/security.txt
+  status: 404
+- host: funnel.io
+  path: /.well-known/openid-configuration
+  status: 404
+- host: funnel.io
+  path: /.well-known/oauth-authorization-server
+  status: 404
+- host: funnel.io
+  path: /.well-known/api-catalog
+  status: 404
+- host: funnel.io
+  path: /.well-known/ai-plugin.json
+  status: 404
+- host: help.funnel.io
+  path: /.well-known/security.txt
+  status: 200
+  content_type: text/plain
+  file: null
+  third_party: true
+  note: >-
+    NOT Funnel's. The help centre is hosted by Intercom and the document served is Intercom's own
+    security.txt ("# Intercom - reporting security vulnerabilities to Intercom"). It documents
+    Intercom's disclosure process, not Funnel's, so no SecurityTxt pointer is emitted and Funnel is
+    not credited with a served security.txt.
+- host: help.funnel.io
+  path: /.well-known/oauth-authorization-server
+  status: 404
+- host: help.funnel.io
+  path: /.well-known/api-catalog
+  status: 404
+- host: app.funnel.io
+  path: /.well-known/security.txt
+  status: 403
+  note: App host is an S3/CloudFront origin that returns AccessDenied for every /.well-known/* path.
+- host: controlplane.setup.us.funnel.io
+  path: /.well-known/oauth-authorization-server
+  status: 401
+  note: >-
+    The Control Plane API rejects any request without User-Agent "terraform-provider-funnel/<ver>"
+    with HTTP 400, and every path behind that check with HTTP 401. No anonymous discovery surface.
+- host: controlplane.setup.eu.funnel.io
+  path: /.well-known/oauth-authorization-server
+  status: 401
+notes: >-
+  Three real .well-known documents are served on Funnel-controlled hosts, so a WellKnown pointer is
+  emitted. No security.txt is served by Funnel itself (the only 200 is Intercom's on the hosted help
+  centre), so no SecurityTxt pointer is emitted.

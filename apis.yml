@@ -9,20 +9,29 @@ description: >-
   and layers on advanced marketing measurement (Marketing Mix Modeling and Multi-Touch Attribution)
   plus dashboards and reporting. Programmatic configuration is exposed through the Funnel Control
   Plane API, consumed via an official Terraform provider and an OAuth 2.0 client-credentials
-  (Auth0) system-user flow, with regional US and EU data residency.
+  (Auth0) system-user flow, with regional US and EU data residency. Funnel also ships a first-party
+  hosted MCP server (Funnel MCP) that exposes six read-only tools over OAuth to Claude, ChatGPT,
+  Cursor and other MCP clients, plus a documented inbound file-import webhook API. Funnel publishes
+  no OpenAPI or AsyncAPI for any of the three surfaces.
 url: https://raw.githubusercontent.com/api-evangelist/funnel/refs/heads/main/apis.yml
 accessModel:
-  pricing: unknown
-  onboarding: self-serve
+  pricing: paid
+  onboarding: sales-gate
   trial: false
   try_now: false
   public: false
-  label: Self-serve signup
-  confidence: medium
+  label: Demo/sales required
+  confidence: high
   source:
   - authentication
-  generated: '2026-07-22'
-  method: derived
+  - https://funnel.io/pricing
+  generated: '2026-08-12'
+  method: searched
+  note: >-
+    Every published tier (Starter from $300/mo, Business from $600/mo, Enterprise custom, all billed
+    annually) routes to "Book a demo" or "Talk to sales". There is no free tier, no trial and no
+    self-serve checkout, so API credentials cannot be obtained without a sales conversation. See
+    plans/funnel-plans-pricing.yml.
 image: https://funnel.io/hubfs/Blog%20images.006.jpeg
 x-type: company
 x-source: vc-portfolio
@@ -33,7 +42,7 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-19'
+modified: '2026-08-12'
 tags:
 - Company
 - Marketing
@@ -47,6 +56,9 @@ tags:
 - Attribution
 - Reporting
 - Business Intelligence
+- MCP
+- AI Agents
+- Marketing Mix Modeling
 apis:
 - name: Funnel Control Plane API
   description: >-
@@ -68,6 +80,64 @@ apis:
     url: conventions/funnel-conventions.yml
   - type: DataModel
     url: data-model/funnel-data-model.yml
+  - type: ErrorCatalog
+    url: errors/funnel-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/funnel-rate-limits.yml
+  - type: AgentSkill
+    url: skills/funnel-provision-control-plane.md
+- name: Funnel MCP
+  description: >-
+    Funnel MCP is Funnel's first-party hosted, remote Model Context Protocol server. It exposes a
+    Funnel workspace's harmonized cross-channel marketing data, semantic field definitions and
+    workspace context to any MCP-compatible client (Claude, ChatGPT, Cursor, Copilot, Lovable,
+    Perplexity, Notion) over streamable HTTP JSON-RPC. It publishes six read-only tools —
+    list_workspaces, load_workspace, search_fields, get_dimension_values, prepare_data and
+    query_data — and cannot create or change data sources, fields, dashboards, exports or any other
+    Funnel configuration. Authentication is OAuth 2.0 authorization-code against Funnel's Auth0
+    tenant at login.funnel.io, with RFC 7591 dynamic client registration and RFC 9728
+    protected-resource metadata served anonymously. Regional servers exist for global and EU data
+    residency, and the surface is available on all plans without consuming flexpoints.
+  humanURL: https://funnel.io/funnel-mcp
+  baseURL: https://mcp.ai.funnel.io/mcp
+  tags:
+  - MCP
+  - AI Agents
+  - Marketing Data
+  - Analytics
+  properties:
+  - type: MCPServer
+    url: mcp/funnel-mcp.yml
+  - type: OAuthScopes
+    url: scopes/funnel-scopes.yml
+  - type: Authentication
+    url: authentication/funnel-authentication.yml
+  - type: AgentSkill
+    url: skills/funnel-query-marketing-data.md
+  - type: Quickstart
+    url: https://help.funnel.io/en/articles/15014203-quick-start-guide-using-funnel-mcp
+- name: Funnel File Import Webhook API
+  description: >-
+    The Funnel File Import Webhook API is a documented inbound HTTP endpoint that lets a customer
+    hand Funnel links to data files for ingestion into a File Import data source. A per-source
+    webhook URL and secret token are generated in the Funnel app; the consumer POSTs a JSON string or
+    array of HTTPS links (publicly accessible or pre-signed) with the token in the
+    x-funnel-fileimport-token header. Funnel then fetches and imports each file. CSV, TSV, XLSX and
+    ZIP are supported, up to 1 GB per file, and published status codes cover 200, 400, 401 and 500.
+    Funnel documents the older object-shaped request body as deprecated.
+  humanURL: https://help.funnel.io/en/articles/8439795-file-import-webhook-api-documentation
+  baseURL: https://fileimport-webhook.funnel.io
+  tags:
+  - Data Integration
+  - File Import
+  - Webhooks
+  properties:
+  - type: Webhooks
+    url: asyncapi/funnel-webhooks.yml
+  - type: ErrorCatalog
+    url: errors/funnel-problem-types.yml
+  - type: Authentication
+    url: authentication/funnel-authentication.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -120,8 +190,35 @@ common:
   url: security/funnel-domain-security.yml
 - type: LLMsTxt
   url: llms/funnel-llms.txt
+- type: WellKnown
+  url: well-known/funnel-well-known.yml
+- type: MCPServer
+  url: mcp/funnel-mcp.yml
+- type: OAuthScopes
+  url: scopes/funnel-scopes.yml
+- type: ErrorCatalog
+  url: errors/funnel-problem-types.yml
+- type: RateLimits
+  url: rate-limits/funnel-rate-limits.yml
+- type: Plans
+  url: plans/funnel-plans-pricing.yml
+- type: Webhooks
+  url: asyncapi/funnel-webhooks.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Quickstart
+  url: https://help.funnel.io/en/articles/15014203-quick-start-guide-using-funnel-mcp
+- type: HelpCenter
+  url: https://help.funnel.io/en/
+- type: Login
+  url: https://app.funnel.io/
 x-enrichment:
-  date: '2026-07-19'
-  status: backfilled
+  date: '2026-08-12'
+  status: enriched
+  artifacts_added: 13
   pass: local-v1
-  note: backfilled from .gitignore signal + verified work evidence
+  note: >-
+    Round 2. Discovered Funnel's first-party hosted MCP server (mcp.ai.funnel.io / mcp.eu.ai.funnel.io),
+    its RFC 9728 protected-resource metadata, the Auth0 OIDC discovery document at login.funnel.io,
+    the published file-import webhook API, real pricing, and the undocumented User-Agent gate on the
+    Control Plane API. No OpenAPI or AsyncAPI exists on any Funnel host.

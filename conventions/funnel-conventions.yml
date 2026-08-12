@@ -1,44 +1,175 @@
-generated: '2026-07-19'
+generated: '2026-08-12'
 method: searched
 source: >-
   https://registry.terraform.io/providers/funnel-io/funnel/latest/docs +
-  terraform-provider-funnel source (provider/funnel/funnel_client.go, provider/funnel/error_handler.go)
-api: Funnel Control Plane API
+  terraform-provider-funnel source (provider/funnel/funnel_client.go, provider/funnel/error_handler.go,
+  provider/provider.go) + live probes of controlplane.setup.{us,eu}.funnel.io on 2026-08-12 +
+  https://help.funnel.io/en/articles/8439795-file-import-webhook-api-documentation +
+  https://help.funnel.io/en/articles/15014203-quick-start-guide-using-funnel-mcp
+apis:
+- Funnel Control Plane API
+- Funnel MCP
+- Funnel File Import Webhook API
 authentication:
   style: oauth2-client-credentials
-  detail: OAuth 2.0 client-credentials (Auth0 system user) -> Bearer token. See authentication/funnel-authentication.yml
+  detail: >-
+    Control Plane: OAuth 2.0 client-credentials (Auth0 system user) -> Bearer token.
+    MCP: OAuth 2.0 authorization-code with dynamic client registration.
+    Webhook: static per-source token in the x-funnel-fileimport-token header.
+    See authentication/funnel-authentication.yml.
+required_request_headers:
+  api: Funnel Control Plane API
+  headers:
+  - name: Authorization
+    value: <access token>
+    note: >-
+      The official client sets this to the raw token value returned by ApplyHTTPHeaders — the
+      "Bearer " prefix is carried in the stored token, not added by the header setter.
+  - name: Content-Type
+    value: application/json
+  - name: Accept
+    value: application/json
+  - name: User-Agent
+    value: terraform-provider-funnel/<version>
+    required: true
+    enforced: true
+    detail: >-
+      THE MOST CONSEQUENTIAL CONVENTION ON THIS API AND IT IS NOWHERE IN THE DOCS. The Control Plane
+      rejects every request whose User-Agent is not "terraform-provider-funnel" with
+      HTTP 400 {"error":"Invalid User-Agent header. Expected terraform-provider-funnel"}, and rejects
+      a version string below its floor with
+      HTTP 400 {"error":"terraform-provider-funnel version is too old. Minimum required: 0.1.0"}.
+      Both were reproduced anonymously on 2026-08-12. In practice the API is not a general-purpose
+      REST API at all: it is a private transport for Funnel's own Terraform provider, and any other
+      client must impersonate that provider's User-Agent to be served.
 versioning:
   scheme: uri-path
   current: v1
   detail: Control Plane API is served under a /v1 path segment on each regional host.
+  client_versioning:
+    detail: >-
+      A second, server-enforced version axis exists on the User-Agent (minimum provider version
+      0.1.0). Funnel can therefore force client upgrades without changing the URI version.
 regions:
   style: host-based-data-residency
   hosts:
   - region: us
-    host: https://controlplane.setup.us.funnel.io/v1
+    control_plane: https://controlplane.setup.us.funnel.io/v1
+    mcp: https://mcp.ai.funnel.io/mcp
+    app: https://app.funnel.io/
   - region: eu
-    host: https://controlplane.setup.eu.funnel.io/v1
+    control_plane: https://controlplane.setup.eu.funnel.io/v1
+    mcp: https://mcp.eu.ai.funnel.io/mcp
+    app: https://app.eu.funnel.io/
   - region: stage
-    host: https://controlplane.setup.stage.funnel.io/v1
+    control_plane: https://controlplane.setup.stage.funnel.io/v1
+    note: Funnel-internal staging target exposed as an option in the Terraform provider schema.
+  - region: dev
+    control_plane: http://localhost:3000/v1
+    note: Local development target in the provider schema; not a customer-facing sandbox.
   detail: >-
-    The region (us/eu) selects both the API host and the Auth0 audience; US and EU are isolated for
-    data residency. A stage environment exists for testing.
+    The region (us/eu) selects the API host, the MCP host and the Auth0 audience together; US and EU
+    are isolated for data residency. EU data residency is an Enterprise-plan feature. Funnel's docs
+    state plainly "Do not guess regional endpoints" — the MCP URL must be read from the app.
+  root_liveness:
+    url: https://controlplane.setup.{us|eu}.funnel.io/
+    status: 200
+    body: Hello from Controlplane!
+    note: The bare host root answers unauthenticated; /health returns {"status":"ok"}.
 scoping:
   unit: subscription
+  id_format: fsXXXXXXXXXXX
+  id_format_source: provider/provider.go schema description
   detail: >-
-    A subscription_id scopes all operations; workspaces, data sources, and exports are addressed by
-    resource IDs obtained from the Funnel app UI or resource URLs.
+    A subscription_id scopes all Control Plane operations; workspaces, data sources and exports are
+    addressed by resource IDs obtained from the Funnel app UI or resource URLs.
+resource_addressing:
+  style: nested-path
+  patterns:
+  - '/v1/subscriptions/{subscription_id}/{entity}'
+  - '/v1/subscriptions/{subscription_id}/{entity}/{id}'
+  - '/v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/{entity}'
+  - '/v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/{entity}/{id}'
+  source: provider/funnel/funnel_client.go
+  detail: >-
+    Two nesting levels: subscription-scoped entities (workspaces) and workspace-scoped entities
+    (exports, datasources, custom-fields, fields). See data-model/funnel-data-model.yml for the full
+    binding of entity segment to resource.
+http_methods:
+  used:
+  - GET
+  - POST
+  - PUT
+  - PATCH
+  - DELETE
+  semantics:
+    POST: create, on the collection path
+    PUT: full replace, on the item path (workspaces, exports, custom-fields)
+    PATCH: partial update, used only for datasources
+    DELETE: delete, on the item path
+  inconsistency_note: >-
+    Update semantics are not uniform: datasources are updated with PATCH while every other entity is
+    updated with PUT. A consumer cannot infer the method from the resource shape.
 idempotency:
   supported: false
-  detail: No documented idempotency-key mechanism for the Control Plane API.
+  header: null
+  detail: >-
+    No idempotency-key mechanism of any kind is published or implemented — the official client sends
+    no such header. The one idempotent-by-accident behaviour is DELETE: the client treats HTTP 404
+    on delete as success, so repeating a delete is safe. Retrying a POST is not.
 pagination:
   supported: unknown
-  detail: Not documented in the public Terraform provider docs.
-errors:
   detail: >-
-    The provider maps non-2xx HTTP responses to Terraform diagnostics via a dedicated error handler;
-    see conformance/funnel-conformance.yml. A formal RFC 9457 problem+json envelope is not documented.
+    Not documented, and not exercised by the official client, which only ever reads single resources
+    by id. No list endpoint, page/cursor parameter or collection envelope appears in the first-party
+    client source.
+filtering_and_expansion:
+  supported: unknown
+  detail: No sparse-fieldset, expansion or field-selection convention is published.
+request_id_tracing:
+  supported: false
+  detail: >-
+    No request-id or correlation header is set by the official client or documented in responses.
+    The only support-facing reference identifier Funnel documents is an "ofid" shown in MCP
+    authorization failures, which is surfaced in the UI rather than in a response header.
+errors:
+  format: vendor-json
+  envelope: '{"error": "<message>"}'
+  detail: >-
+    Flat single-member JSON, where "error" is a string OR a nested object; no RFC 9457
+    application/problem+json, no stable error codes. Full catalogue in
+    errors/funnel-problem-types.yml.
+rate_limit_signaling:
+  headers: []
+  status_on_exhaustion: 429
+  quota_status: 403
+  detail: >-
+    429 is returned and handled by name in the official client, but NO rate-limit response headers
+    and no Retry-After are documented or read. Capacity exhaustion is signalled separately as
+    403 "Forbidden - limit reached". See rate-limits/funnel-rate-limits.yml.
+mcp_conventions:
+  transport: streamable-http
+  protocol: JSON-RPC 2.0
+  mutability: read-only
+  detail: >-
+    Funnel MCP tools never mutate configuration. The documented tool order is list_workspaces ->
+    load_workspace -> search_fields / get_dimension_values -> query_data or prepare_data. Funnel
+    notes the client, not the server, decides tool order.
+  auth_error_shape: '{"jsonrpc":"2.0","id":0,"error":{"code":-32001,"message":"Missing Bearer token"}}'
+webhook_conventions:
+  direction: inbound
+  detail: >-
+    POST links (not file content) as a bare JSON string or JSON array to a per-source URL with a
+    per-source token header. The older {"urls": ...} object body is deprecated by Funnel. See
+    asyncapi/funnel-webhooks.yml.
+cross_links:
+  authentication: authentication/funnel-authentication.yml
+  scopes: scopes/funnel-scopes.yml
+  errors: errors/funnel-problem-types.yml
+  rate_limits: rate-limits/funnel-rate-limits.yml
+  lifecycle: lifecycle/funnel-lifecycle.yml
+  data_model: data-model/funnel-data-model.yml
 notes: >-
-  Conventions derived from the official Terraform provider (the first-party client for the Control
-  Plane API) and its published registry docs; Funnel does not publish a standalone OpenAPI/REST
-  reference for this API.
+  No idempotency mechanism exists, so no Idempotency pointer is emitted. The headline finding this
+  round is the enforced User-Agent gate on the Control Plane API: the surface is functionally closed
+  to any client that is not Funnel's own Terraform provider.

@@ -1,8 +1,10 @@
-generated: '2026-07-19'
+generated: '2026-08-12'
 method: derived
 source: >-
   Terraform provider resources/data-sources (docs/resources/*, docs/data-sources/* in
-  github.com/funnel-io/terraform-provider-funnel) — the documented Control Plane API entities.
+  github.com/funnel-io/terraform-provider-funnel) — the documented Control Plane API entities —
+  plus provider/funnel/funnel_client.go and provider/resources/*.go, which bind each entity to its
+  real HTTP path segment and method.
 api: Funnel Control Plane API
 entities:
 - name: subscription
@@ -71,7 +73,102 @@ relationships:
   to: workspace
   kind: belongs_to
   via: workspace
+http_bindings:
+  source: provider/funnel/funnel_client.go + provider/resources/*.go + provider/datasources/*.go
+  base: https://controlplane.setup.{us|eu}.funnel.io/v1
+  scopes:
+  - level: subscription
+    path: /v1/subscriptions/{subscription_id}/{entity}[/{id}]
+  - level: workspace
+    path: /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/{entity}[/{id}]
+  entities:
+  - entity_segment: workspaces
+    scope: subscription
+    resources:
+    - workspace
+    methods:
+    - POST /v1/subscriptions/{subscription_id}/workspaces
+    - GET /v1/subscriptions/{subscription_id}/workspaces/{id}
+    - PUT /v1/subscriptions/{subscription_id}/workspaces/{id}
+    - DELETE /v1/subscriptions/{subscription_id}/workspaces/{id}
+  - entity_segment: exports
+    scope: workspace
+    resources:
+    - bigquery_export
+    - snowflake_export
+    - gcs_export
+    - measurement_export
+    methods:
+    - POST /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/exports
+    - GET /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/exports/{id}
+    - PUT /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/exports/{id}
+    - DELETE /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/exports/{id}
+    note: >-
+      All four export destinations share ONE polymorphic endpoint; the destination type is carried in
+      the request body, not in the path. This is why an export type cannot be inferred from the URL.
+  - entity_segment: datasources
+    scope: workspace
+    resources:
+    - data_source
+    methods:
+    - POST /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/datasources
+    - GET /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/datasources/{id}
+    - PATCH /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/datasources/{id}
+    - DELETE /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/datasources/{id}
+    note: The only entity updated with PATCH; every other entity uses PUT.
+  - entity_segment: custom-fields
+    scope: workspace
+    resources:
+    - custom_dimension
+    - custom_metric
+    methods:
+    - POST /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/custom-fields
+    - GET /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/custom-fields/{id}
+    - PUT /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/custom-fields/{id}
+    - DELETE /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/custom-fields/{id}
+    note: >-
+      Dimensions and metrics share one endpoint and are distinguished by body payload. Dimension
+      data_type is one of string|date|datetime; metric data_type is one of
+      number|percent|monetary|duration.
+  - entity_segment: fields
+    scope: workspace
+    resources:
+    - export_field
+    methods:
+    - GET /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/fields/{name}
+    note: Read-only lookup, addressed by field NAME rather than by an opaque id.
+  identifiers:
+  - entity: subscription
+    format: fsXXXXXXXXXXX
+    source: provider/provider.go schema description
+  data_source_remote_identity:
+    fields:
+    - remote_id
+    - remote_struct
+    detail: >-
+      A data source carries the identifier of the account in the SOURCE system (Google Ads customer
+      ID, Facebook Ads account ID). Connectors needing several identifiers use remote_struct, a
+      JSON-encoded object (e.g. {customer_id, login_customer_id} for Google Ads). remote_id and
+      remote_struct are mutually exclusive and both force resource replacement when changed.
+mcp_projection:
+  api: Funnel MCP
+  note: >-
+    Funnel MCP reads an entirely different model — the DATA plane (workspaces, platforms, fields,
+    dimensions, measures, metrics, dimension values, rows) rather than the CONFIGURATION plane
+    modelled above. The only entity shared by both surfaces is workspace. Because the two surfaces
+    barely overlap, no tool crosswalk is emitted.
+  entities_referenced:
+  - workspace
+  - platform
+  - field
+  - dimension
+  - measure
+  - metric
+  - dimension_value
+  source: https://help.funnel.io/en/articles/15014203-quick-start-guide-using-funnel-mcp
 notes: >-
   Entity graph derived from the official Terraform provider's documented resources and data sources,
   which map one-to-one onto Control Plane API entities. Funnel does not publish an OpenAPI spec, so
-  field-level schemas and id-prefixes are not enumerated here.
+  field-level schemas and id-prefixes are not enumerated here; the http_bindings block above is read
+  directly from the first-party client source and is the closest thing to a published path
+  inventory that exists for this API.

@@ -1,0 +1,118 @@
+generated: '2026-08-12'
+method: searched
+source: https://funnel.io/pricing
+http_status: 200
+plan_count: 3
+currency: USD
+billing_period: month
+billing_note: Listed monthly prices are "starts from", billed annually.
+model:
+  type: plan-plus-capacity
+  detail: >-
+    Funnel prices in two components: the PLAN, which decides which functionality is available, and
+    FLEXPOINT capacity, which decides how much of it you can connect. Data volume and row counts are
+    explicitly not charged for.
+plans:
+- name: Starter
+  price: 300
+  currency: USD
+  period: month
+  billing: annual
+  price_qualifier: starts from
+  cta: Book a demo
+  included:
+    connectors: 121
+    users: 5
+    workspaces: 1
+    portals: 1
+    reporting_solutions: 3
+    export_destinations: 0
+    measurement: not-available
+  limits:
+    export_destinations: Not available on this tier
+- name: Business
+  price: 600
+  currency: USD
+  period: month
+  billing: annual
+  price_qualifier: starts from
+  cta: Book a demo
+  included:
+    connectors: 579
+    users: unlimited
+    workspaces: unlimited
+    portals: unlimited
+    reporting_solutions: 6
+    export_destinations: 26
+    measurement: add-on
+    advanced_data_hub_capabilities: true
+    custom_integrations: on-request
+- name: Enterprise
+  price: null
+  price_label: Custom
+  currency: USD
+  period: null
+  cta: Talk to sales
+  included:
+    connectors: 590
+    connectors_marketing_label: 600+
+    users: unlimited
+    workspaces: unlimited
+    portals: unlimited
+    reporting_solutions: 6
+    export_destinations: 27
+    measurement: add-on
+    advanced_data_hub_capabilities: true
+    custom_integrations: on-request
+    enterprise_governance_and_compliance: true
+  enterprise_features:
+  - Single Sign-On (Okta, Azure AD, SAML, OIDC, SCIM)
+  - Advanced roles and permissions
+  - Audit log
+  - EU data centre available
+  - Multi-entity usage
+  - Enterprise SLA (contractual commitments on support, repair times and uptime)
+capacity_unit:
+  name: flexpoint
+  abbreviation: FP
+  detail: >-
+    Capacity is bought on top of any plan, via sales or in-product. Consumption rates published on
+    the pricing page.
+  consumption:
+  - item: Connector (e.g. Facebook Ads, Google Analytics)
+    cost: 50
+  - item: Account / data source (e.g. ad account, GA4 property)
+    cost: 5
+  - item: Visualization destination (e.g. Looker Studio, Google Sheets)
+    cost: 150
+  - item: Data warehouse destination (e.g. BigQuery, Snowflake)
+    cost: 300
+  - item: Conversion API destination
+    cost: 50
+  - item: Conversion platform account
+    cost: 5
+api_access:
+  metered: false
+  detail: >-
+    Programmatic access is not sold as a separate tier or metered add-on. Funnel AI and Funnel MCP
+    are listed as available on ALL plans, and Funnel states that Funnel MCP does not consume
+    flexpoints. The Control Plane API (Terraform provider) is not named as a priced line item; it
+    governs resources whose creation consumes flexpoints, which is why the API returns HTTP 403
+    "Forbidden - limit reached" when capacity is exhausted.
+add_ons:
+- name: Funnel Measure
+  pricing: custom
+  detail: >-
+    Measurement (marketing mix modeling, multi-touch attribution, incrementality testing) is priced
+    separately based on ad spend and setup. Available as an add-on module on Business and
+    Enterprise; not available on Starter.
+free_tier: false
+trial: false
+self_serve_checkout: false
+self_serve_note: >-
+  Every tier routes to "Book a demo" or "Talk to sales". There is no published self-serve checkout
+  and no free tier, so a developer cannot obtain credentials without a sales conversation.
+notes: >-
+  Read from Funnel's public pricing page on 2026-08-12. Two named tiers carry real published list
+  prices; Enterprise is quote-only. The plan matrix also confirms two facts used elsewhere in this
+  repo: EU data residency is an Enterprise-tier feature, and SAML/OIDC/SCIM SSO is Enterprise-only.

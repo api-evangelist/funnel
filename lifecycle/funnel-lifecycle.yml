@@ -1,22 +1,86 @@
-generated: '2026-07-19'
+generated: '2026-08-12'
 method: searched
-source: https://status.funnel.io + https://registry.terraform.io/providers/funnel-io/funnel
-api: Funnel Control Plane API
+source: >-
+  https://status.funnel.io + https://registry.terraform.io/providers/funnel-io/funnel +
+  https://help.funnel.io/en/collections/11649803-funnel-release-notes +
+  https://funnel.io/pricing
+apis:
+- Funnel Control Plane API
+- Funnel MCP
+- Funnel File Import Webhook API
 versioning:
   scheme: uri-path
   current: v1
+  client_version_floor:
+    header: User-Agent
+    minimum: terraform-provider-funnel/0.1.0
+    detail: >-
+      A second, server-enforced version axis: the Control Plane rejects clients advertising a
+      provider version below its floor with HTTP 400. Funnel can force client upgrades without ever
+      changing the URI version, and does not publish the floor anywhere in its documentation.
 status_page: https://status.funnel.io
 status_page_provider: Atlassian Statuspage
 provider_releases: https://github.com/funnel-io/terraform-provider-funnel/releases
+release_notes: https://help.funnel.io/en/collections/11649803-funnel-release-notes
 deprecation:
   policy_url: null
   sunset_header: unknown
-  detail: No published deprecation policy or RFC 8594 Sunset/Deprecation header commitment found.
+  detail: >-
+    No published API deprecation policy and no RFC 8594 Sunset/Deprecation header commitment. No
+    deprecation window, notice period or support horizon is stated for any of the three surfaces.
+  observed_practice:
+  - subject: File Import webhook request body
+    detail: >-
+      Funnel marks the {"urls": ...} object body form as deprecated in the webhook documentation and
+      states it "will be removed in upcoming updates" — with no date, no version and no header.
+    source: https://help.funnel.io/en/articles/8439795-file-import-webhook-api-documentation
+  - subject: Third-party connector changes
+    detail: >-
+      Funnel maintains a standing "Upcoming third-party platform changes" article plus per-connector
+      migration guides (Amazon DSP, Google Ads, Reddit v3, Idealo v2, StackAdapt REST retirement,
+      Zbozi/Sklik Fenix). These communicate deprecations in the platforms Funnel INGESTS FROM, not in
+      Funnel's own API contract.
+    source: https://help.funnel.io/en/articles/14802495-upcoming-third-party-platform-changes
+  pointer_emitted: false
+  pointer_reason: >-
+    No Deprecation pointer is emitted. The observed practice above concerns third-party connectors
+    and one undated body-shape change, not a published deprecation policy for Funnel's own APIs.
+beta_surfaces:
+- name: PostgreSQL export destination
+  status: beta
+  availability: on request
+  source: https://help.funnel.io/en/articles/15191839-may-2026-release-notes
+- name: Claude connector directory listing for Funnel MCP
+  status: in progress
+  source: https://help.funnel.io/en/articles/15170890-connect-funnel-mcp-to-claude-as-a-custom-connector
+known_open_defects:
+- id: query_data-empty-parameter-schema
+  surface: Funnel MCP
+  status: open
+  detail: >-
+    Funnel publicly acknowledges that its MCP server ships an incomplete parameter schema for the
+    query_data tool and that a server-side fix is required. Documented as a troubleshooting article
+    rather than a status-page incident.
+  source: >-
+    https://help.funnel.io/en/articles/15460006-troubleshoot-query_data-type-validation-errors-in-funnel-mcp
 sla:
   url: null
-  detail: No public SLA/uptime-target document found (Enterprise plan; SLA likely contractual).
+  tier: Enterprise
+  detail: >-
+    "Enterprise SLA — detailed contractual commitments around support, repair times and uptime" is
+    listed as an Enterprise-plan feature on the pricing page. No numeric uptime target is published;
+    the SLA is contractual and not available to Starter or Business.
+  source: https://funnel.io/pricing
+support:
+  channel: https://help.funnel.io/en/
+  regions:
+  - Stockholm
+  - Boston
+  - Sydney
+  detail: Support availability is a plan-differentiated feature; onboarding/implementation packages exist on all tiers.
 notes: >-
-  Status page confirmed live at status.funnel.io (Atlassian Statuspage, "Operational"). Versioning
-  and release cadence for the programmatic surface are tracked via the official Terraform provider
-  releases (see changelog/funnel-changelog.yml). No public deprecation policy was found, so no
-  Deprecation pointer is emitted.
+  Status page confirmed live at status.funnel.io (Atlassian Statuspage). The lifecycle picture this
+  round is materially richer than last: two dated release streams, an acknowledged open MCP defect, a
+  beta destination, and one genuinely deprecated request shape — but still no deprecation policy, no
+  Sunset header commitment and no public SLA, so neither a Deprecation pointer nor an SLA URL is
+  emitted.

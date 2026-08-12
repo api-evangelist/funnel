@@ -1,0 +1,92 @@
+generated: '2026-08-12'
+method: searched
+source: >-
+  https://help.funnel.io/en/articles/8439795-file-import-webhook-api-documentation +
+  https://help.funnel.io/en/articles/8439483-file-import-webhook-overview
+asyncapi_spec: null
+asyncapi_note: >-
+  Funnel publishes no AsyncAPI document. Probes of /asyncapi.yaml and /asyncapi.json on every Funnel
+  host, and a scan of the funnel-io GitHub organisation (10 public repos), found none.
+direction: inbound
+direction_note: >-
+  IMPORTANT — read this before treating Funnel as an event publisher. Funnel's "webhook" is
+  INBOUND: the consumer POSTs to a Funnel-issued URL to hand Funnel file links to ingest. Funnel
+  does NOT publish outbound event callbacks to consumer-supplied endpoints, and there is no event
+  catalogue, no subscription API, no delivery-retry policy and no signature-verification scheme to
+  document. Funnel's only outbound notification surface is human-facing daily connection emails
+  (optionally relayed into Slack), not a machine event stream.
+webhooks:
+- name: File Import Webhook
+  provider_name: Funnel's webhook / File Import - Webhook API
+  direction: inbound
+  url_template: https://fileimport-webhook.funnel.io/{webhook_id}
+  method: POST
+  content_type: application/json
+  authentication:
+    type: apiKey
+    in: header
+    name: x-funnel-fileimport-token
+    detail: >-
+      Per-data-source secret token generated inside the Funnel app when a File Import data source is
+      created with the Webhook transport type. Requests without it are denied with 401.
+  purpose: >-
+    Send Funnel LINKS to files to ingest — not file content. Funnel then fetches each link and loads
+    the file into the File Import data source.
+  request_body:
+    shapes:
+    - form: single link
+      example: '"https://link-to-file.csv"'
+    - form: list of links
+      example: '["https://link-to-file-1.csv","https://link-to-file-2.csv"]'
+    deprecated_shapes:
+    - form: object with urls member (single)
+      example: '{"urls": "https://link-to-file.csv"}'
+      status: deprecated
+      detail: Funnel states this form "will be removed in upcoming updates".
+    - form: object with urls member (list)
+      example: '{"urls": ["https://link-to-file-1.csv","https://link-to-file-2.csv"]}'
+      status: deprecated
+  link_requirements:
+  - Links must be HTTPS.
+  - Links must be publicly accessible or pre-signed; password-protected links are rejected.
+  - The body carries links, never file content.
+  constraints:
+    file_types:
+    - CSV
+    - TSV
+    - XLSX
+    - ZIP (containing one or more of the above)
+    max_file_size: 1 GB
+    throttling: >-
+      Documented but unquantified — "If you send an abnormal number of requests or at a very high
+      frequency, your requests may be denied." See rate-limits/funnel-rate-limits.yml.
+  responses:
+  - status: 200
+    meaning: Accepted; Funnel will attempt the import. Acceptance is not import success.
+  - status: 400
+    meaning: Bad request — missing or invalid links in the POST body.
+  - status: 401
+    meaning: Invalid credentials — wrong or missing x-funnel-fileimport-token.
+  - status: 500
+    meaning: Internal server error on Funnel's side.
+  see: errors/funnel-problem-types.yml
+  common_integrations:
+  - AWS Lambda
+  - Google Cloud Functions
+  - Azure Functions
+  - Zapier
+  - Microsoft Power Automate
+  published_examples:
+  - curl
+  - Python (requests)
+  - Node.js (https)
+event_catalog: []
+event_catalog_note: >-
+  Empty by fact, not by omission — Funnel documents no outbound events. This is why no AsyncAPI
+  artifact is emitted and why the event-surface family is genuinely N/A for this provider rather
+  than a gap.
+notes: >-
+  Captured verbatim from Funnel's own published webhook documentation, including its stated
+  deprecation of the {"urls": ...} body form. This is a real, first-party, documented HTTP contract
+  with published authentication, request shapes and status codes — one of only three programmatic
+  surfaces Funnel ships.

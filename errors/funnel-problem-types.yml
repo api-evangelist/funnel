@@ -1,0 +1,131 @@
+generated: '2026-08-12'
+method: derived
+source: >-
+  provider/funnel/error_handler.go + provider/funnel/funnel_client.go
+  (github.com/funnel-io/terraform-provider-funnel, the official first-party client) +
+  https://help.funnel.io/en/articles/8439795-file-import-webhook-api-documentation
+format: vendor-json
+format_detail: >-
+  NOT RFC 9457. Funnel's Control Plane API returns a flat JSON object with a single top-level
+  "error" member. The official client's extractErrorMessage() handles that member being either a
+  string or a nested object, so both shapes occur in production. There is no type/title/status/
+  detail/instance envelope and no application/problem+json media type anywhere in the surface.
+envelope:
+  media_type: application/json
+  fields:
+  - name: error
+    type: string | object
+    required: true
+    description: >-
+      Human-readable message, or a nested object that the official client serializes back to JSON
+      when it is not a string.
+  observed_examples:
+  - '{"error":"Unauthorized"}'
+  - '{"error":"Invalid User-Agent header. Expected terraform-provider-funnel"}'
+  - '{"error":"terraform-provider-funnel version is too old. Minimum required: 0.1.0"}'
+  observed_examples_note: >-
+    All three were captured live on 2026-08-12 from https://controlplane.setup.us.funnel.io/ without
+    credentials.
+apis:
+- api: Funnel Control Plane API
+  base: https://controlplane.setup.{us|eu}.funnel.io/v1
+  problem_types:
+  - status: 400
+    name: Bad Request
+    client_message: >-
+      The message extracted from the response "error" member, or the literal "Bad Request" when the
+      body cannot be parsed.
+    known_causes:
+    - Missing or non-matching User-Agent header (the API demands "terraform-provider-funnel").
+    - >-
+      User-Agent naming a provider version below the server's minimum (currently 0.1.0), returned as
+      "terraform-provider-funnel version is too old. Minimum required: 0.1.0".
+    - Malformed or invalid request body on create/update.
+    remediation: >-
+      Send User-Agent "terraform-provider-funnel/<version>" at or above the advertised minimum and
+      correct the request body against the resource schema.
+    retryable: false
+  - status: 401
+    name: Unauthorized
+    client_message: Unauthorized
+    known_causes:
+    - Missing Authorization header.
+    - Expired, malformed or wrong-audience Auth0 access token.
+    - Token minted for the US audience presented to the EU host (or the reverse).
+    remediation: >-
+      Re-run the client-credentials exchange at https://login.funnel.io/oauth/token with the audience
+      matching the regional host you are calling.
+    retryable: false
+  - status: 403
+    name: Forbidden - limit reached
+    client_message: Forbidden - limit reached
+    known_causes:
+    - >-
+      A subscription capacity limit was hit. Funnel meters capacity in "flexpoints" and caps plan
+      entitlements (connectors, accounts, destinations, workspaces), so a create call can be
+      rejected as over-limit rather than unauthorized. The official client's own wording for 403 is
+      "limit reached", which is why this is a quota signal and not a permissions signal.
+    remediation: Add flexpoint capacity or upgrade the plan; see plans/funnel-plans-pricing.yml.
+    retryable: false
+  - status: 404
+    name: Not Found
+    client_message: Not Found
+    known_causes:
+    - Unknown subscription_id, workspace/account id, or resource id.
+    remediation: Verify the id from the Funnel app URL or from a list/read call.
+    retryable: false
+    special_case: >-
+      On DELETE, 404 is treated as SUCCESS by the official client (HandleDeleteError returns nil),
+      making delete effectively idempotent from the consumer's point of view even though the API
+      publishes no idempotency key mechanism.
+  - status: 429
+    name: Too Many Requests
+    client_message: Too Many Requests
+    known_causes:
+    - Request rate exceeded an unpublished server-side limit.
+    remediation: >-
+      Back off and retry. No Retry-After handling exists in the official client and no limit values
+      are published; see rate-limits/funnel-rate-limits.yml.
+    retryable: true
+  - status: 5xx
+    name: Generic error
+    client_message: >-
+      Parsed from the response "error" member when present, otherwise a generic failure carrying the
+      status code.
+    retryable: true
+- api: Funnel File Import Webhook API
+  base: https://fileimport-webhook.funnel.io/{webhook_id}
+  source: https://help.funnel.io/en/articles/8439795-file-import-webhook-api-documentation
+  problem_types:
+  - status: 200
+    name: OK
+    description: >-
+      Accepted. Funnel will attempt to fetch and import the files behind the submitted links; the
+      files appear in the data source shortly afterwards. Acceptance is not import success.
+  - status: 400
+    name: Bad request
+    description: >-
+      The request body is missing links or contains links Funnel cannot use. The body must be a JSON
+      string (one link) or a JSON array of strings; links must be HTTPS and either publicly
+      accessible or pre-signed.
+    remediation: Resend with a valid JSON string or array of HTTPS links in the POST body.
+  - status: 401
+    name: Invalid credentials
+    description: The x-funnel-fileimport-token header is missing or does not match the webhook URL.
+    remediation: Send the secret token generated in the Funnel File Import data source.
+  - status: 500
+    name: Internal server error
+    description: Failure on Funnel's side.
+    retryable: true
+error_code_catalog:
+  published: false
+  detail: >-
+    Funnel publishes no stable machine-readable error code vocabulary for either surface — no
+    "code" member, no error-code reference page. Consumers can only branch on HTTP status and, for
+    400, on free-text English message strings. Every message string recorded above is quoted from
+    Funnel's own client source or docs, not invented.
+notes: >-
+  Derived because Funnel publishes no OpenAPI. The Control Plane rows come from the error handler in
+  Funnel's own open-source Terraform provider, which is the authoritative first-party statement of
+  what the API returns; the webhook rows are transcribed from Funnel's published error-code section.
+  See conventions/funnel-conventions.yml for the request-side rules.

@@ -1,0 +1,77 @@
+generated: '2026-08-12'
+method: probed
+source: >-
+  https://mcp.ai.funnel.io/.well-known/oauth-protected-resource/mcp +
+  https://mcp.eu.ai.funnel.io/.well-known/oauth-protected-resource/mcp +
+  https://login.funnel.io/.well-known/openid-configuration
+docs: https://help.funnel.io/en/articles/15014203-quick-start-guide-using-funnel-mcp
+authorization_server: https://login.funnel.io
+identity_provider: Auth0
+surfaces:
+- api: Funnel MCP
+  resource: https://mcp.ai.funnel.io/mcp
+  flow: authorization_code
+  metadata: well-known/funnel-mcp-oauth-protected-resource.json
+  http_status: 200
+  scopes:
+  - name: openid
+    required: true
+    description: OIDC subject identity. Issues an ID token identifying the Funnel user.
+  - name: profile
+    required: false
+    description: Standard OIDC profile claims (name, given_name, family_name, nickname, picture).
+  - name: email
+    required: false
+    description: Standard OIDC email claims (email, email_verified).
+  - name: offline_access
+    required: false
+    description: >-
+      Issues a refresh token so the MCP client can keep the connection alive without a fresh
+      browser sign-in. Its absence is what surfaces as the "Connection has expired" reconnect
+      prompt Funnel documents for Claude.
+- api: Funnel MCP (EU)
+  resource: https://mcp.eu.ai.funnel.io/mcp
+  flow: authorization_code
+  metadata: well-known/funnel-mcp-eu-oauth-protected-resource.json
+  http_status: 200
+  scopes:
+  - name: openid
+  - name: profile
+  - name: email
+  - name: offline_access
+- api: Funnel Control Plane API
+  resource: https://controlplane.setup.us.funnel.io
+  flow: client_credentials
+  scopes: []
+  scopes_note: >-
+    No OAuth scopes are used. The system-user client-credentials grant is authorized by audience
+    (https://controlplane.setup.{us,eu}.funnel.io) and scoped by subscription_id, not by scope
+    strings. See authentication/funnel-authentication.yml.
+authorization_server_scopes_supported:
+- openid
+- profile
+- offline_access
+- name
+- given_name
+- family_name
+- nickname
+- email
+- email_verified
+- picture
+- created_at
+- identities
+- phone
+- address
+authorization_server_note: >-
+  The list above is what the Auth0 tenant advertises in scopes_supported; only the four scopes in
+  the MCP protected-resource metadata are actually requested for the Funnel MCP resource.
+authorization_model:
+  granularity: identity-only
+  detail: >-
+    Funnel does not publish any resource- or action-scoped OAuth scopes. Authorization for MCP is
+    entirely delegated to the signed-in Funnel user's own workspace permissions, and the whole MCP
+    surface is read-only by construction. There is therefore no way for a consumer to request a
+    narrower grant than "everything this user can read".
+notes: >-
+  Probed anonymously from the RFC 9728 Protected Resource Metadata documents Funnel serves on both
+  regional MCP hosts. Nothing here is derived from an OpenAPI spec — Funnel publishes none.

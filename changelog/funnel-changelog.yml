@@ -1,20 +1,90 @@
-generated: '2026-07-19'
+generated: '2026-08-12'
 method: searched
-source: https://github.com/funnel-io/terraform-provider-funnel/releases
-subject: Funnel Terraform provider (funnel-io/funnel) — the first-party client for the Funnel Control Plane API
-scheme: semver
-current_version: v0.2.1
-entries:
-- version: v0.2.1
-  date: '2026-06-16'
-  highlights: Terraform provider release (funnel-io/funnel v0.2.1).
-- version: v0.2.0
-  date: '2026-04-24'
-  highlights: Terraform provider release (funnel-io/funnel v0.2.0).
-- version: v0.1.6
-  date: null
-  highlights: Terraform provider release (funnel-io/funnel v0.1.6).
+source: >-
+  https://help.funnel.io/en/collections/11649803-funnel-release-notes +
+  https://github.com/funnel-io/terraform-provider-funnel/releases
+docs: https://help.funnel.io/en/collections/11649803-funnel-release-notes
+subject: Funnel platform release notes + the first-party Terraform provider for the Control Plane API
+streams:
+- name: Funnel product release notes
+  url: https://help.funnel.io/en/collections/11649803-funnel-release-notes
+  scheme: dated-monthly
+  cadence: monthly
+  dated: true
+  breaking_changes_flagged: false
+  latest: '2026-07'
+  entries:
+  - version: July 2026
+    date: '2026-07'
+    url: https://help.funnel.io/en/articles/8820257-july-2026-release-notes
+    highlights: >-
+      Redesigned sidebar navigation — Funnel AI (formerly Data Chat) promoted to a dedicated space;
+      Insights moved into Report for measurement plans; Budgets & targets, Conventions and Media
+      plans moved into Data under Plan & govern alongside the new Campaign mapper.
+    breaking: false
+  - version: May 2026
+    date: '2026-05'
+    url: https://help.funnel.io/en/articles/15191839-may-2026-release-notes
+    highlights: >-
+      Funnel AI workspace context (persistent workspace instructions, 27 May); Funnel AI available
+      across the app with a follow-along chat widget (22 May); image attachments in Funnel AI
+      (22 May); PostgreSQL export destination in beta (20 May); scheduled exports for data source
+      inventory (20 May).
+    breaking: false
+  - version: April 2026
+    date: '2026-04'
+    url: https://help.funnel.io/en/articles/14486495-april-2026-release-notes
+    breaking: false
+  - version: March 2026
+    date: '2026-03'
+    url: https://help.funnel.io/en/articles/14115639-march-2026-release-notes
+    breaking: false
+  - version: January 2026
+    date: '2026-01'
+    url: https://help.funnel.io/en/articles/13368276-january-2026-release-notes
+    breaking: false
+  note: >-
+    Monthly notes run continuously from at least February 2025. A separate standing article,
+    "Upcoming third-party platform changes"
+    (https://help.funnel.io/en/articles/14802495-upcoming-third-party-platform-changes), carries
+    forward-looking connector deprecations and migrations.
+- name: Terraform provider releases
+  url: https://github.com/funnel-io/terraform-provider-funnel/releases
+  registry: https://registry.terraform.io/providers/funnel-io/funnel/latest
+  scheme: semver
+  current_version: v0.2.2
+  current_version_date: '2026-08-06'
+  dated: true
+  entries:
+  - version: v0.2.2
+    date: '2026-08-06'
+  - version: v0.2.1
+    date: '2026-06-16'
+  - version: v0.2.0
+    date: '2026-04-24'
+  - version: v0.1.6
+    date: '2026-03-27'
+  - version: v0.1.5
+    date: '2026-03-20'
+  - version: v0.1.4
+    date: '2026-03-04'
+  - version: v0.1.3
+    date: '2026-02-25'
+  - version: v0.1.2
+    date: '2026-02-23'
+  - version: v0.1.1
+    date: '2026-02-06'
+  note: >-
+    Dates are release published_at timestamps from the GitHub Releases API, cross-checked against the
+    Terraform Registry (which reports 0.2.2 published 2026-08-06). Release notes on the tags are
+    version-number only; the repository also carries a CHANGELOG.md.
+api_changelog:
+  published: false
+  detail: >-
+    Neither the Control Plane API nor Funnel MCP has its own versioned, dated changelog. The product
+    release notes cover platform features (including Funnel AI and MCP behaviour) and the provider
+    releases cover the Terraform client, but no document records API contract changes as such. There
+    is no breaking-change flag on any stream.
 notes: >-
-  Funnel does not publish a dated changelog for the Control Plane API itself; the official Terraform
-  provider's GitHub releases are the authoritative dated change history for the programmatic surface.
-  Dates are the release published_at timestamps from the GitHub Releases API.
+  Two real dated streams, both first-party and both current within the last week. Upgraded from the
+  previous round, which recorded only the Terraform provider releases and stopped at v0.2.1.

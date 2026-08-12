@@ -1,42 +1,33 @@
 # Funnel
 
-> Funnel (commonly known as funnel.io) is the leading Marketing Intelligence solution in the market. It helps marketers from agencies and brands alike, by integrating with hundreds of data platforms in order to streamline data analysis. It offers data collection, data visualization and advanced marketing measurement solutions (MMM and MTA) to thousands of brands all around the world. 
+> Funnel is a marketing intelligence platform that gives brands and agencies dependable marketing data everywhere decisions are made. It brings marketing data together from any source, stores it, applies consistent definitions and keeps history intact, so reporting, business intelligence, measurement and AI all run on the same trusted data. Funnel is delivered through two products: Data Hub, the core platform that collects, stores, prepares and activates marketing data and includes built-in dashboards and Funnel AI, and Funnel Measure, an add-on for measurement such as marketing mix modeling, multi-touch attribution and incrementality testing.
 
-
-This file highlights Funnel's solution as well as evergreen, structured, and authoritative content suitable for citation.
+This file highlights evergreen, structured and authoritative pages on funnel.io that are suitable for citation. All links point to live web pages.
 
 ## Core Content
 
-- [Product Overview](https://funnel.io/product-overview.md): A comprehensive overview of Funnels capabilities and services.
+- [Product Overview](https://funnel.io/product-overview): An overview of Funnel's platform, its products (Data Hub and Measure) and how teams use it across reporting, measurement and data delivery.
 
-- [Data Hub](https://funnel.io/data-hub.md): A descripiton of Funnel's Data Hub and its functionalities.
+- [Data Hub](https://funnel.io/data-hub): Funnel's core product. How Funnel collects, stores, prepares and activates marketing data as one governed source of truth.
 
-- [Data Sources](https://funnel.io/all-data-sources.md): A list of all the sources that integrate with Funnel
+- [Data Sources](https://funnel.io/all-data-sources): The full list of platforms and sources Funnel connects to.
 
-- [Funnel Measurement](https://funnel.io/measure.md): An explanation of Funnel's MMM and MTA solution
+- [Funnel Measurement](https://funnel.io/measure): Funnel's measurement product, covering marketing mix modeling (MMM), multi-touch attribution (MTA) and incrementality testing.
 
-- [Marketing Dashboards and Reports](https://funnel.io/report.md): An overview of how marketers can use Funnel for reporting and visualization
+- [Marketing Reporting and Dashboards](https://funnel.io/report): How marketers use Funnel for reporting and dashboards, inside Funnel or in their own BI and visualization tools.
 
-- [Case Studies](https://funnel.io/all-case-studies.md): A repository of case studies showing how Funnel helped clients achieve business goals
+- [Case Studies](https://funnel.io/all-case-studies): Customer stories showing how brands and agencies use Funnel.
 
-- [Comparing Funnel and Supermetrics](https://funnel.io/funnel-vs-supermetrics.md): A fair and factual comparison between Funnel and Supermetrics, the pros and cons of each solution
+- [Funnel vs Supermetrics](https://funnel.io/funnel-vs-supermetrics): A factual comparison of Funnel and Supermetrics.
 
-- [Funnel vs Adverity](https://funnel.io/funnel-vs-adverity.md): A comprehensive comparison between Funnel and Adverity
+## Optional
 
-- [What is data transformation](https://funnel.io/blog/what-is-data-transformation.md): An expert-written guide explaining what is Data Transformation for marketers
+- [Marketing data warehouses explained](https://funnel.io/blog/marketing-data-warehouses): What marketing data warehouses are, why to use one and how to implement it.
 
-## OPTIONAL
+- [Marketing mix modeling mistakes and how to avoid them](https://funnel.io/blog/marketing-mix-modeling): An introduction to marketing mix modeling for marketers, including 10 common mistakes you need to avoid.
 
-- [The complete guide to UTM tags](https://funnel.io/blog/google-analytics-utm-tagging.md): A long and comprehensive guide about UTMs, how they work and how to create consistent tagging for better data analytics
+- [Multiple regression explained for marketers](https://funnel.io/blog/what-is-multiple-linear-regression): A plain explanation of linear regression and how it relates to marketing mix modeling.
 
-- [What makes a MMM model good?](https://funnel.io/blog/marketing-mix-modelling.md): A beginners explanation regarding advanced marketing measurement and MMMs
+- [How to do MMM analysis with regression](https://funnel.io/blog/mmm-analysis): A beginner's guide to marketing mix modeling analysis.
 
-- [What is a semantic layer?](https://funnel.io/blog/what-is-a-semantic-layer.md): A thorough explanation of what a semantic layer is and how to use it.
-
-- [Marketing data warehouses explained](https://funnel.io/blog/marketing-data-warehouses.md): An overview of what are marketing data warehouses, why one should use it and how to implement it
-
-- [Multiple Regression explained for marketers](https://funnel.io/blog/what-is-multiple-linear-regression.md): A simple explanation of what is linear regression, how it relates to Marketing Mix Modelling and how marketers should use it
-
-- [What is incrementality testing?](https://funnel.io/blog/incrementality-testing.md): An expert explanation of what is incrementality testing and how marketers should use it
-
-- [How to do MMM analysis with regression](https://funnel.io/blog/mmm-analysis.md): A beginners guide to marketing mix modelling and marketing measurement, written by an expert.
+- [What is incrementality?](https://funnel.io/blog/incrementality): An explanation of incrementality and incrementality testing.

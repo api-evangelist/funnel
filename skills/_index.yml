@@ -1,0 +1,44 @@
+generated: '2026-08-12'
+method: generated
+source: >-
+  Grounded in Funnel's published MCP tool reference
+  (https://help.funnel.io/en/articles/15014203-quick-start-guide-using-funnel-mcp) and in the
+  first-party Terraform provider source (github.com/funnel-io/terraform-provider-funnel), plus live
+  probes of controlplane.setup.us.funnel.io and mcp.ai.funnel.io on 2026-08-12.
+skills:
+- file: funnel-query-marketing-data.md
+  name: Query Funnel marketing data over MCP
+  api: Funnel MCP
+  surface: mcp
+  grounding: mcp/funnel-mcp.yml
+  operations:
+  - list_workspaces
+  - load_workspace
+  - search_fields
+  - get_dimension_values
+  - query_data
+  - prepare_data
+- file: funnel-provision-control-plane.md
+  name: Provision Funnel workspaces, data sources and exports
+  api: Funnel Control Plane API
+  surface: rest
+  grounding: data-model/funnel-data-model.yml
+  operations:
+  - POST /v1/subscriptions/{subscription_id}/workspaces
+  - GET /v1/subscriptions/{subscription_id}/workspaces/{id}
+  - PUT /v1/subscriptions/{subscription_id}/workspaces/{id}
+  - DELETE /v1/subscriptions/{subscription_id}/workspaces/{id}
+  - POST /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/datasources
+  - PATCH /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/datasources/{id}
+  - POST /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/custom-fields
+  - POST /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/exports
+  - GET /v1/subscriptions/{subscription_id}/workspaces/{workspace_id}/fields/{name}
+grounding_note: >-
+  Funnel publishes no OpenAPI, so there are no operationIds to cite. Every MCP tool name is
+  transcribed verbatim from Funnel's own published tool reference, and every REST path and method is
+  read from Funnel's own open-source client (provider/funnel/funnel_client.go and
+  provider/resources/*.go). Nothing in either skill is invented.
+notes: >-
+  Two skills, one per programmatic surface, because the two surfaces do not overlap: MCP is
+  read-only DATA access and the Control Plane API is write CONFIGURATION management. The file-import
+  webhook is a single POST and does not warrant a skill; see asyncapi/funnel-webhooks.yml.

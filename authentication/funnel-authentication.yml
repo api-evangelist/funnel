@@ -1,17 +1,48 @@
-generated: '2026-07-19'
+generated: '2026-08-12'
 method: searched
 source: >-
   https://registry.terraform.io/providers/funnel-io/funnel/latest/docs +
-  provider/auth/auth0_client.go (github.com/funnel-io/terraform-provider-funnel)
+  provider/auth/auth0_client.go (github.com/funnel-io/terraform-provider-funnel) +
+  https://login.funnel.io/.well-known/openid-configuration +
+  https://mcp.ai.funnel.io/.well-known/oauth-protected-resource/mcp +
+  https://help.funnel.io/en/articles/15014203-quick-start-guide-using-funnel-mcp +
+  https://help.funnel.io/en/articles/8439795-file-import-webhook-api-documentation
 docs: https://registry.terraform.io/providers/funnel-io/funnel/latest/docs
 summary:
   types:
   - oauth2
+  - openIdConnect
+  - apiKey
   oauth2_flows:
   - clientCredentials
-  api_key_in: []
+  - authorizationCode
+  api_key_in:
+  - header
+authorization_server:
+  issuer: https://login.funnel.io/
+  identity_provider: Auth0
+  discovery: https://login.funnel.io/.well-known/openid-configuration
+  discovery_http_status: 200
+  discovery_file: well-known/funnel-login-openid-configuration.json
+  token_endpoint: https://login.funnel.io/oauth/token
+  authorization_endpoint: https://login.funnel.io/authorize
+  registration_endpoint: https://login.funnel.io/oidc/register
+  dynamic_client_registration: true
+  pkce_methods:
+  - S256
+  - plain
+  token_endpoint_auth_methods:
+  - client_secret_basic
+  - client_secret_post
+  - private_key_jwt
+  - none
+  detail: >-
+    One Auth0 tenant on Funnel's own domain fronts every programmatic surface. It serves a real OIDC
+    discovery document anonymously and advertises RFC 7591 dynamic client registration, which is what
+    lets MCP clients such as Claude register themselves without a pre-shared client ID.
 schemes:
 - name: FunnelSystemUserOAuth
+  api: Funnel Control Plane API
   type: oauth2
   flow: clientCredentials
   token_url: https://login.funnel.io/oauth/token
@@ -28,12 +59,83 @@ schemes:
   scopes: []
   sources:
   - registry.terraform.io/providers/funnel-io/funnel/latest/docs
+  - provider/auth/auth0_client.go
   description: >-
     Server-to-server OAuth 2.0 client-credentials flow. A "System user" is created per subscription
     in the Funnel app (Subscription overview -> Authentication), yielding a client_id and
     client_secret. These are exchanged at the Auth0 token endpoint with the region-appropriate
     audience for a Bearer access token used against the regional Control Plane API host.
+  additional_requirement:
+    header: User-Agent
+    value: terraform-provider-funnel/<version>
+    detail: >-
+      A valid token is NOT sufficient. The Control Plane API rejects any request whose User-Agent is
+      not "terraform-provider-funnel" with HTTP 400 before authentication is even evaluated, and
+      rejects a version below its advertised minimum (currently 0.1.0) the same way. Verified live
+      on 2026-08-12. This is an undocumented client-lock-in gate; see
+      conventions/funnel-conventions.yml.
+- name: FunnelMCPOAuth
+  api: Funnel MCP
+  type: oauth2
+  flow: authorizationCode
+  authorization_server: https://login.funnel.io
+  resource:
+  - https://mcp.ai.funnel.io/mcp
+  - https://mcp.eu.ai.funnel.io/mcp
+  protected_resource_metadata:
+  - well-known/funnel-mcp-oauth-protected-resource.json
+  - well-known/funnel-mcp-eu-oauth-protected-resource.json
+  rfc: RFC 9728 (OAuth 2.0 Protected Resource Metadata)
+  token_type: Bearer
+  dynamic_client_registration: true
+  static_client_id_available: true
+  scopes:
+  - openid
+  - profile
+  - email
+  - offline_access
+  see: scopes/funnel-scopes.yml
+  description: >-
+    Interactive, user-delegated OAuth 2.0 authorization-code flow. The MCP client is registered
+    dynamically at https://login.funnel.io/oidc/register (or given a static client ID copied from
+    Funnel AI > MCP > Advanced for clients that cannot do DCR), the end user signs in to Funnel in a
+    browser, and the resulting Bearer token authorizes read-only tool calls scoped to that user's own
+    workspace permissions. Missing or absent tokens return a JSON-RPC error
+    {"code":-32001,"message":"Missing Bearer token"} with HTTP 401.
+  known_failure_modes:
+  - Dynamic client registration failing in Claude Desktop via mcp-remote.
+  - OAuth callback URL mismatch on login.funnel.io.
+  - token_exchange_failed after OAuth appears to succeed.
+  - '"Unknown client" invalid_request when connecting from Notion.'
+  known_failure_modes_source: https://help.funnel.io/en/collections/19637543-funnel-mcp
+- name: FunnelFileImportToken
+  api: Funnel File Import Webhook API
+  type: apiKey
+  in: header
+  name: x-funnel-fileimport-token
+  scope: per-data-source
+  description: >-
+    Static secret token generated per File Import data source inside the Funnel app when the Webhook
+    transport type is enabled. Paired with a per-source webhook URL of the form
+    https://fileimport-webhook.funnel.io/{webhook_id}. Requests without a matching token are denied
+    with HTTP 401 "Invalid credentials". No rotation policy, expiry or signature scheme is published.
+enterprise_sso:
+  available_on: Enterprise plan only
+  methods:
+  - SAML
+  - OIDC
+  - SCIM
+  - Sign-in with Google
+  identity_providers_named:
+  - Okta
+  - Azure AD
+  source: https://funnel.io/pricing
+  detail: >-
+    End-user (human) authentication into the Funnel app. Gated to the Enterprise tier; Starter and
+    Business get Sign-in with Google only.
 notes: >-
-  No scope surface is documented (access is scoped by subscription and audience, not OAuth scopes),
-  so no scopes/ artifact is emitted. Authentication is region-aware: US and EU environments use
-  distinct audiences and Control Plane hosts (controlplane.setup.us|eu.funnel.io) for data residency.
+  Three distinct authentication schemes across three distinct programmatic surfaces, all anchored on
+  one Auth0 tenant at login.funnel.io. Scopes exist only on the MCP surface and are identity scopes,
+  not resource scopes — the Control Plane grant is authorized by audience and scoped by
+  subscription_id instead. Authentication is region-aware throughout: US and EU use distinct Control
+  Plane hosts and audiences, and distinct MCP hosts, for data residency.

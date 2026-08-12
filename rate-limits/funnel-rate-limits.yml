@@ -1,0 +1,82 @@
+generated: '2026-08-12'
+method: searched
+source: >-
+  https://help.funnel.io/en/articles/8439795-file-import-webhook-api-documentation +
+  provider/funnel/error_handler.go (github.com/funnel-io/terraform-provider-funnel) +
+  https://funnel.io/pricing
+limit_count: 0
+published_limits: false
+summary: >-
+  Funnel publishes no numeric rate limits, no window, no burst and no rate-limit response headers for
+  any of its three programmatic surfaces. What it does publish are two exhaustion SIGNALS — an HTTP
+  429 the official client handles by name, and a documented but unquantified "throttling" policy on
+  the file-import webhook — plus a hard capacity model (flexpoints) that is enforced as HTTP 403
+  rather than 429.
+surfaces:
+- api: Funnel Control Plane API
+  base: https://controlplane.setup.{us|eu}.funnel.io/v1
+  limits: []
+  exhaustion:
+    status: 429
+    body: '{"error":"Too Many Requests"}'
+    evidence: >-
+      provider/funnel/error_handler.go maps http.StatusTooManyRequests to the message
+      "Too Many Requests" on reads/writes and "too many requests" on deletes, so the API does return
+      429 in production even though no threshold is published.
+  response_headers:
+    observed: []
+    detail: >-
+      The official first-party client reads NO rate-limit headers — it inspects only the status code
+      and the JSON "error" member — and no X-RateLimit-*, RateLimit-* or Retry-After header is
+      documented. An agent has no runtime budget signal to work with; it can only react after the
+      429.
+  retry_after: undocumented
+  quota_signal:
+    status: 403
+    message: Forbidden - limit reached
+    detail: >-
+      Capacity exhaustion is signalled separately from rate limiting: the client's own wording for
+      403 is "limit reached", which corresponds to the flexpoint/plan entitlement caps rather than a
+      request-rate ceiling.
+- api: Funnel MCP
+  base: https://mcp.ai.funnel.io/mcp
+  limits: []
+  published: false
+  detail: >-
+    No rate limits are documented for the MCP server. Funnel states explicitly that Funnel MCP is
+    available on all plans and does NOT consume flexpoints, so it sits outside the capacity model
+    that governs the rest of the platform. Live anonymous probing returns 401 before any limit is
+    reachable, so nothing could be observed.
+  source: https://help.funnel.io/en/articles/15014203-quick-start-guide-using-funnel-mcp
+- api: Funnel File Import Webhook API
+  base: https://fileimport-webhook.funnel.io/{webhook_id}
+  limits:
+  - scope: per-webhook
+    window: unspecified
+    limit: null
+    detail: >-
+      Verbatim from Funnel's docs: "If you send an abnormal number of requests or at a very high
+      frequency, your requests may be denied." No number, no window, no header, and no status code
+      is given for the denial.
+  payload_limits:
+  - name: file size
+    value: 1 GB or less
+    detail: Per-file guidance from the webhook documentation.
+  - name: supported file types
+    value: CSV, TSV, XLSX, ZIP (containing the above)
+  response_headers:
+    observed: []
+capacity_model:
+  unit: flexpoint
+  source: https://funnel.io/pricing
+  detail: >-
+    Funnel's commercial limit is capacity, not request rate. Flexpoints are consumed per connector
+    (50 FP), per connected account/data source (5 FP), per visualization destination (150 FP), per
+    data warehouse destination (300 FP), per Conversion API (50 FP) and per conversion platform
+    account (5 FP). Funnel states it does not charge for data volume or row counts. Exceeding
+    capacity is what surfaces as the Control Plane's 403 "Forbidden - limit reached".
+notes: >-
+  Recorded as an honest zero: limits exist and are enforced (a 429 path is implemented and a
+  throttling policy is stated) but no value, window or response header is published anywhere, so a
+  consumer cannot plan against them. The most consequential gap for agents is the total absence of
+  rate-limit response headers on a surface that does return 429.
