@@ -1,19 +1,15 @@
 generated: '2026-08-12'
 method: searched
-source: >-
-  https://funnel.io/funnel-mcp +
-  https://help.funnel.io/en/articles/15014203-quick-start-guide-using-funnel-mcp +
-  https://help.funnel.io/en/articles/15170890-connect-funnel-mcp-to-claude-as-a-custom-connector +
-  https://help.funnel.io/en/articles/15502539-connect-funnel-mcp-from-funnel-ai
+source: https://funnel.io/funnel-mcp + https://help.funnel.io/en/articles/15014203-quick-start-guide-using-funnel-mcp
+  + https://help.funnel.io/en/articles/15170890-connect-funnel-mcp-to-claude-as-a-custom-connector + https://help.funnel.io/en/articles/15502539-connect-funnel-mcp-from-funnel-ai
 docs: https://help.funnel.io/en/collections/19637543-funnel-mcp
 status: official
 name: Funnel MCP
-description: >-
-  Funnel's first-party hosted, remote MCP server. It exposes a Funnel workspace's harmonized
-  cross-channel marketing data, field/semantic definitions and workspace context to any
-  MCP-compatible client (Claude, ChatGPT, Cursor, Copilot, Lovable, Perplexity, Notion). It is
-  explicitly READ-ONLY: it reads data and definitions and cannot create or change data sources,
-  fields, dashboards, exports or any other Funnel configuration.
+description: 'Funnel''s first-party hosted, remote MCP server. It exposes a Funnel workspace''s harmonized
+  cross-channel marketing data, field/semantic definitions and workspace context to any MCP-compatible
+  client (Claude, ChatGPT, Cursor, Copilot, Lovable, Perplexity, Notion). It is explicitly READ-ONLY:
+  it reads data and definitions and cannot create or change data sources, fields, dashboards, exports
+  or any other Funnel configuration.'
 transport: streamable-http
 servers:
 - region: global
@@ -24,9 +20,8 @@ servers:
     method: POST tools/list (JSON-RPC 2.0)
     http_status: 401
     body: '{"jsonrpc":"2.0","id":0,"error":{"code":-32001,"message":"Missing Bearer token"}}'
-    note: >-
-      Live and speaking MCP JSON-RPC; the tool list is OAuth-gated so inputSchema could not be
-      introspected anonymously.
+    note: Live and speaking MCP JSON-RPC; the tool list is OAuth-gated so inputSchema could not be introspected
+      anonymously.
 - region: eu
   url: https://mcp.eu.ai.funnel.io/mcp
   subscription_host: https://app.eu.funnel.io/
@@ -43,9 +38,8 @@ authentication:
   dynamic_client_registration: true
   registration_endpoint: https://login.funnel.io/oidc/register
   static_client_id_available: true
-  static_client_id_note: >-
-    Clients that cannot do dynamic registration (for example GitHub Copilot) copy an OAuth Client ID
-    from Funnel AI > MCP > Connect Funnel MCP > Advanced.
+  static_client_id_note: Clients that cannot do dynamic registration (for example GitHub Copilot) copy
+    an OAuth Client ID from Funnel AI > MCP > Connect Funnel MCP > Advanced.
   scopes:
   - openid
   - profile
@@ -90,41 +84,40 @@ tools:
   - group_by
   - order_by
   - limit
-  parameters_source: >-
-    https://help.funnel.io/en/articles/15460006-troubleshoot-query_data-type-validation-errors-in-funnel-mcp
+  parameters_source: https://help.funnel.io/en/articles/15460006-troubleshoot-query_data-type-validation-errors-in-funnel-mcp
 tool_count: 6
 input_schemas: gated
-input_schemas_note: >-
-  Tool names, groupings and descriptions above are transcribed verbatim from Funnel's published tool
-  reference. Full JSON inputSchema per tool requires an authenticated tools/list call and was NOT
-  guessed. The one exception is query_data, whose parameter names Funnel publishes in a
-  troubleshooting article; those names are recorded, their types are not.
+input_schemas_note: Tool names, groupings and descriptions above are transcribed verbatim from Funnel's
+  published tool reference. Full JSON inputSchema per tool requires an authenticated tools/list call and
+  was NOT guessed. The one exception is query_data, whose parameter names Funnel publishes in a troubleshooting
+  article; those names are recorded, their types are not.
 known_issues:
 - id: query_data-empty-parameter-schema
-  source: >-
-    https://help.funnel.io/en/articles/15460006-troubleshoot-query_data-type-validation-errors-in-funnel-mcp
-  detail: >-
-    Funnel documents that its MCP server has published an incomplete parameter schema for query_data
-    ("properties": {}), causing strict MCP clients to serialize array/object parameters as strings
-    and the tool to reject them with type validation errors. Funnel states this is a server-side
-    issue requiring a fix from Funnel. This is a provider-acknowledged contract defect in the MCP
-    surface, not a client problem.
+  source: https://help.funnel.io/en/articles/15460006-troubleshoot-query_data-type-validation-errors-in-funnel-mcp
+  detail: 'Funnel documents that its MCP server has published an incomplete parameter schema for query_data
+    ("properties": {}), causing strict MCP clients to serialize array/object parameters as strings and
+    the tool to reject them with type validation errors. Funnel states this is a server-side issue requiring
+    a fix from Funnel. This is a provider-acknowledged contract defect in the MCP surface, not a client
+    problem.'
 infrastructure:
-  note: >-
-    The RFC 9728 metadata at the unsuffixed /.well-known/oauth-protected-resource path discloses that
-    the servers are fronted by AWS Bedrock AgentCore gateways
-    (funnel-mcp-us-*.gateway.bedrock-agentcore.us-east-1.amazonaws.com and
-    funnel-mcp-eu-*.gateway.bedrock-agentcore.eu-central-1.amazonaws.com). Funnel-branded hostnames
+  note: The RFC 9728 metadata at the unsuffixed /.well-known/oauth-protected-resource path discloses that
+    the servers are fronted by AWS Bedrock AgentCore gateways (funnel-mcp-us-*.gateway.bedrock-agentcore.us-east-1.amazonaws.com
+    and funnel-mcp-eu-*.gateway.bedrock-agentcore.eu-central-1.amazonaws.com). Funnel-branded hostnames
     are the documented, supported entry points.
 directory_listing:
   claude_connector_directory: in-progress
   source: https://help.funnel.io/en/articles/15170890-connect-funnel-mcp-to-claude-as-a-custom-connector
-notes: >-
-  This is a genuine first-party hosted MCP server, not a derived candidate. Funnel markets it on its
-  own product page (funnel.io/funnel-mcp), documents it in a dedicated help collection, and lists it
-  as a feature on the pricing page for all plans. Both regional endpoints answered a live JSON-RPC
-  tools/list with a well-formed MCP error, and both publish RFC 9728 protected-resource metadata
-  anonymously. Note the surfaces do not overlap: Funnel MCP is read-only DATA access, while the
-  Funnel Control Plane API is write CONFIGURATION management consumed by the Terraform provider.
-  Neither is a projection of the other, so no tool crosswalk is emitted (there is also no published
-  OpenAPI to bind tools to).
+notes: 'This is a genuine first-party hosted MCP server, not a derived candidate. Funnel markets it on
+  its own product page (funnel.io/funnel-mcp), documents it in a dedicated help collection, and lists
+  it as a feature on the pricing page for all plans. Both regional endpoints answered a live JSON-RPC
+  tools/list with a well-formed MCP error, and both publish RFC 9728 protected-resource metadata anonymously.
+  Note the surfaces do not overlap: Funnel MCP is read-only DATA access, while the Funnel Control Plane
+  API is write CONFIGURATION management consumed by the Terraform provider. Neither is a projection of
+  the other, so no tool crosswalk is emitted (there is also no published OpenAPI to bind tools to).'
+deployment:
+  mode: remote
+  endpoint: https://mcp.ai.funnel.io/mcp
+  verified: probed
+  probe: wall
+  checked: '2026-08-12'
+  source: catalog MCP census
