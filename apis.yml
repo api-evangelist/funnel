@@ -130,6 +130,10 @@ apis:
   tags:
   - Data Integration
   - File Import
+  - Webhook
+  tags_raw:
+  - Data Integration
+  - File Import
   - Webhooks
   properties:
   - type: Webhooks
