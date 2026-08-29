@@ -14,6 +14,17 @@ description: >-
   Cursor and other MCP clients, plus a documented inbound file-import webhook API. Funnel publishes
   no OpenAPI or AsyncAPI for any of the three surfaces.
 url: https://raw.githubusercontent.com/api-evangelist/funnel/refs/heads/main/apis.yml
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: paid
   onboarding: sales-gate
