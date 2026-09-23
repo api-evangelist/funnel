@@ -1,4 +1,4 @@
-generated: '2026-08-12'
+generated: '2026-09-19'
 method: probed
 source: live HTTP probes of every Funnel host named in apis.yml plus the MCP and identity hosts
 summary:
@@ -13,12 +13,10 @@ probes:
   status: 200
   content_type: application/json
   file: funnel-login-openid-configuration.json
-  note: >-
-    Real OIDC discovery document. issuer https://login.funnel.io/, token_endpoint
-    https://login.funnel.io/oauth/token, registration_endpoint https://login.funnel.io/oidc/register
-    (RFC 7591 dynamic client registration), PKCE S256 supported. This is the Auth0 tenant Funnel
-    runs on its own domain and is the authorization server for BOTH the Control Plane API
-    (client_credentials) and Funnel MCP (authorization_code).
+  note: Real OIDC discovery document. issuer https://login.funnel.io/, token_endpoint https://login.funnel.io/oauth/token,
+    registration_endpoint https://login.funnel.io/oidc/register (RFC 7591 dynamic client registration),
+    PKCE S256 supported. This is the Auth0 tenant Funnel runs on its own domain and is the authorization
+    server for BOTH the Control Plane API (client_credentials) and Funnel MCP (authorization_code).
 - host: login.funnel.io
   path: /.well-known/oauth-authorization-server
   status: 200
@@ -39,19 +37,16 @@ probes:
   status: 200
   content_type: application/json
   file: funnel-mcp-oauth-protected-resource.json
-  note: >-
-    RFC 9728 Protected Resource Metadata for the global Funnel MCP server. Names
-    https://login.funnel.io as the authorization server and publishes
-    scopes_supported [openid, profile, email, offline_access] plus a static client_id.
+  note: RFC 9728 Protected Resource Metadata for the global Funnel MCP server. Names https://login.funnel.io
+    as the authorization server and publishes scopes_supported [openid, profile, email, offline_access]
+    plus a static client_id.
 - host: mcp.ai.funnel.io
   path: /.well-known/oauth-protected-resource
   status: 200
   content_type: application/json
   file: null
-  note: >-
-    Also 200, but resolves to the underlying AWS Bedrock AgentCore gateway hostname
-    (funnel-mcp-us-*.gateway.bedrock-agentcore.us-east-1.amazonaws.com) with empty
-    scopes_supported. The /mcp-suffixed document is the accurate one and is what is stored.
+  note: Also 200, but resolves to the underlying AWS Bedrock AgentCore gateway hostname (funnel-mcp-us-*.gateway.bedrock-agentcore.us-east-1.amazonaws.com)
+    with empty scopes_supported. The /mcp-suffixed document is the accurate one and is what is stored.
 - host: mcp.eu.ai.funnel.io
   path: /.well-known/oauth-protected-resource/mcp
   status: 200
@@ -87,11 +82,10 @@ probes:
   content_type: text/plain
   file: null
   third_party: true
-  note: >-
-    NOT Funnel's. The help centre is hosted by Intercom and the document served is Intercom's own
-    security.txt ("# Intercom - reporting security vulnerabilities to Intercom"). It documents
-    Intercom's disclosure process, not Funnel's, so no SecurityTxt pointer is emitted and Funnel is
-    not credited with a served security.txt.
+  note: NOT Funnel's. The help centre is hosted by Intercom and the document served is Intercom's own
+    security.txt ("# Intercom - reporting security vulnerabilities to Intercom"). It documents Intercom's
+    disclosure process, not Funnel's, so no SecurityTxt pointer is emitted and Funnel is not credited
+    with a served security.txt.
 - host: help.funnel.io
   path: /.well-known/oauth-authorization-server
   status: 404
@@ -105,13 +99,71 @@ probes:
 - host: controlplane.setup.us.funnel.io
   path: /.well-known/oauth-authorization-server
   status: 401
-  note: >-
-    The Control Plane API rejects any request without User-Agent "terraform-provider-funnel/<ver>"
+  note: The Control Plane API rejects any request without User-Agent "terraform-provider-funnel/<ver>"
     with HTTP 400, and every path behind that check with HTTP 401. No anonymous discovery surface.
 - host: controlplane.setup.eu.funnel.io
   path: /.well-known/oauth-authorization-server
   status: 401
-notes: >-
-  Three real .well-known documents are served on Funnel-controlled hosts, so a WellKnown pointer is
-  emitted. No security.txt is served by Funnel itself (the only 200 is Intercom's on the hosted help
+notes: Three real .well-known documents are served on Funnel-controlled hosts, so a WellKnown pointer
+  is emitted. No security.txt is served by Funnel itself (the only 200 is Intercom's on the hosted help
   centre), so no SecurityTxt pointer is emitted.
+hosts:
+- host: ''
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: funnel-login-openid-configuration.json
+    content_type: application/json
+    note: Real OIDC discovery document. issuer https://login.funnel.io/, token_endpoint https://login.funnel.io/oauth/token,
+      registration_endpoint https://login.funnel.io/oidc/register (RFC 7591 dynamic client registration),
+      PKCE S256 supported. This is the Auth0 tenant Funnel runs on its own domain and is the authorization
+      server for BOTH the Control Plane API (client_credentials) and Funnel MCP (authorization_code).
+  - path: /.well-known/oauth-protected-resource/mcp
+    status: 200
+    file: funnel-mcp-oauth-protected-resource.json
+    content_type: application/json
+    note: RFC 9728 Protected Resource Metadata for the global Funnel MCP server. Names https://login.funnel.io
+      as the authorization server and publishes scopes_supported [openid, profile, email, offline_access]
+      plus a static client_id.
+  - path: /.well-known/oauth-protected-resource/mcp
+    status: 200
+    file: funnel-mcp-eu-oauth-protected-resource.json
+    content_type: application/json
+    note: EU-region equivalent; same authorization server and scopes.
+- host: https://mcp.ai.funnel.io
+  documents:
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: funnel-mcp-oauth-protected-resource.json
+    bytes: 207
+  path_echo_control: passed
+- host: https://login.funnel.io
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: funnel-login-oauth-authorization-server.json
+    bytes: 2654
+  path_echo_control: passed
+x-shape-fix:
+  converted: '2026-08-20'
+  from: probes
+  note: Rewritten into hosts[] -> documents[], the only shape well_known_docs() in score.rb reads. A served
+    .well-known surface recorded in any other shape scores as absent. Promoted ONLY the 2xx rows out of
+    the probe log; non-2xx probes are real negative results and were left in place, not converted into
+    documents.
+x-mcp-probe:
+  probed: '2026-09-19'
+  issue: roadmap#321, roadmap#337
+  documents:
+  - host: https://mcp.ai.funnel.io
+    path: /.well-known/oauth-protected-resource
+    file: funnel-mcp-oauth-protected-resource.json
+  - host: https://login.funnel.io
+    path: /.well-known/oauth-authorization-server
+    file: funnel-login-oauth-authorization-server.json
+  validated_on: resource (RFC 9728) / issuer (RFC 8414, OIDC)
+  negative_control: one per host; a 2xx JSON object at an impossible path discards the host
+note: 'MCP-host OAuth discovery added 2026-09-19 (roadmap#321/#337): the harvest visits a provider''s
+  primary hosts, and RFC 9728 protected-resource metadata lives on the MCP host, so these documents existed
+  and were invisible to the scorer. Fetched live and validated on `resource`/`issuer`; one negative control
+  per host.'

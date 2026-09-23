@@ -1,0 +1,31 @@
+# Front Door AI Index — funnel — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: funnel
+  lexicon_version: '1.0'
+  probed_at: '2026-09-17'
+  host: funnel.io
+  final_host: funnel.io
+  ownership: own
+  owner: funnel
+  shares_host_with: null
+  inherited_from: null
+  verdict: scored
+  score: 22
+  host_score: 22
+  density: 18.95
+  words: 1161
+  tiers:
+    agentic: 6
+    core: 16
+    model: 0
+  ambiguous: 3
+  top_terms:
+    AI: 15
+    agentic: 3
+    MCP: 2
+    intelligence: 2
+    LLMs: 1
+    agent: 1
+    model context protocol: 1
