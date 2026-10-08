@@ -116,3 +116,31 @@ notes: >-
   Read from Funnel's public pricing page on 2026-08-12. Two named tiers carry real published list
   prices; Enterprise is quote-only. The plan matrix also confirms two facts used elsewhere in this
   repo: EU data residency is an Enterprise-tier feature, and SAML/OIDC/SCIM SSO is Enterprise-only.
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - negotiated
+  - subscription
+  units: []
+  plans:
+  - name: Starter
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Business
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Enterprise
+    access: other
+    model: negotiated
+    model_how: derived
+    units: []
+    periods: []
