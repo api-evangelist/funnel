@@ -16,3 +16,52 @@
   relationship: platform-app
   status: not-a-workflow
   arazzo: null
+- slug: funnel-pypi
+  label: PyPI
+  partner: pypi
+  partner_name: PyPI
+  category: official SDK (Python)
+  type: register
+  channel: package-registry
+  evidence: https://pypi.org/project/funnel-rules-engine/
+  source: edge
+  relationship: distribution-channel
+  contract_reference:
+    register: PyPI (public registry JSON)
+    spec_file: null
+    language: Python
+    packages:
+    - name: funnel-rules-engine
+      version: 1.3.1
+      released: '2024-03-20'
+      released_field: upload_time
+      lapsed: true
+      page: https://pypi.org/project/funnel-rules-engine/
+      repo_leg: github-org:funnel-io
+      publisher_leg: email:funnel.io
+      matched_by: domain
+    - name: json-normalize
+      version: 1.1.0
+      released: '2024-03-28'
+      released_field: upload_time
+      lapsed: true
+      page: https://pypi.org/project/json-normalize/
+      repo_leg: github-org:funnel-io
+      publisher_leg: email:funnel.io
+      matched_by: domain
+    - name: python-on-rails
+      version: 1.0.1
+      released: '2023-03-09'
+      released_field: upload_time
+      lapsed: true
+      page: https://pypi.org/project/python-on-rails/
+      repo_leg: github-org:funnel-io
+      publisher_leg: email:funnel.io
+      matched_by: domain
+    current: false
+    signal_note: 'an official package on the registry: distribution, not an integration; lapsed = no release in
+      24 months'
+    detected_by: sweep-official-sdks.py
+    detected: '2026-10-18'
+  status: not-a-workflow
+  arazzo: null
